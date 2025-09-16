@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Chat - Admin e Usuários</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        header {
+            background: #4f46e5;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo h1 {
+            font-size: 24px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .admin {
+            background: #ef4444;
+        }
+        .user {
+            background: #10b981;
+        }
+        .main-content {
+            display: flex;
+            min-height: 600px;
+        }
+        .sidebar {
+            width: 300px;
+            background: #f8fafc;
+            border-right: 1px solid #e5e7eb;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .ticket-form {
+            margin-bottom: 20px;
+        }
+        .ticket-form input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .ticket-form button {
+            width: 100%;
+            padding: 10px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .ticket-form button:hover {
+            background: #4338ca;
+        }
+        .ticket-form button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .ticket-list {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .ticket-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .ticket-item:hover {
+            background: #f3f4f6;
+            border-color: #4f46e5;
+        }
+        .ticket-item.active {
+            background: #e0e7ff;
+            border-color: #4f46e5;
+        }
+        .ticket-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .ticket-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-header h2 {
+            font-size: 18px;
+        }
+        .back-button {
+            background: #9ca3af;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .back-button:hover {
+            background: #6b7280;
+        }
+        .messages-container {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f9fafb;
+        }
+        .message {
+            max-width: 70%;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message-content {
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 5px;
+        }
+        .message-time {
+            font-size: 12px;
+            color: #6b7280;
+            margin-left: 15px;
+        }
+        .message.received {
+            align-items: flex-start;
+        }
+        .message.sent {
+            align-items: flex-end;
+            margin-left: auto;
+        }
+        .received .message-content {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-top-left-radius: 4px;
+        }
+        .sent .message-content {
+            background: #4f46e5;
+            color: white;
+            border-top-right-radius: 4px;
+        }
+        .message-input {
+            padding: 20px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 15px;
+            background: white;
+        }
+        .message-input input {
+            flex-grow: 1;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 24px;
+            outline: none;
+            font-size: 16px;
+        }
+        .message-input input:focus {
+            border-color: #4f46e5;
+        }
+        .message-input button {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            transition: background 0.3s;
+        }
+        .message-input button:hover {
+            background: #4338ca;
+        }
+        .auth-container {
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .auth-form {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .auth-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4f46e5;
+        }
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .auth-tab.active {
+            color: #4f46e5;
+            border-bottom: 2px solid #4f46e5;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+        .form-group input:focus {
+            border-color: #4f46e5;
+        }
+        .auth-button {
+            width: 100%;
+            padding: 12px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .auth-button:hover {
+            background: #4338ca;
+        }
+        .error {
+            color: #ef4444;
+            margin-top: 10px;
+            text-align: center;
+            padding: 10px;
+            background: #fef2f2;
+            border-radius: 8px;
+        }
+        .success {
+            color: #10b981;
+            margin-top: 10px;
+            text-align: center;
+            padding: 10px;
+            background: #f0fdf4;
+            border-radius: 8px;
+        }
+        .empty-state {
+            text-align: center;
+            color: #6b7280;
+            padding: 40px 20px;
+        }
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #9ca3af;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Configuração do Supabase
+        const supabaseUrl = 'https://wazaqaafywwgbxbixibf.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhemFxYWFmeXd3Z2J4Yml4aWJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyMTMzMzgsImV4cCI6MjA3MTc4OTMzOH0.-qC_yCCmxsXW5MyMU0YCQ7jAQktS9hAG69BogA47Ib0';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        // Componente de Autenticação
+        function AuthComponent() {
+            const [email, setEmail] = React.useState('');
+            const [password, setPassword] = React.useState('');
+            const [isLogin, setIsLogin] = React.useState(true);
+            const [loading, setLoading] = React.useState(false);
+            const [error, setError] = React.useState('');
+            const [success, setSuccess] = React.useState('');
+
+            async function handleSubmit(e) {
+                e.preventDefault();
+                setLoading(true);
+                setError('');
+                setSuccess('');
+
+                try {
+                    if (isLogin) {
+                        const { error } = await supabase.auth.signInWithPassword({ email, password });
+                        if (error) throw error;
+                    } else {
+                        const { data, error } = await supabase.auth.signUp({ email, password });
+                        if (error) throw error;
+                        
+                        // Criar perfil do usuário
+                        if (data.user) {
+                            await supabase
+                                .from('user_profiles')
+                                .insert([{ 
+                                    id: data.user.id, 
+                                    full_name: null,
+                                    is_admin: email.includes('admin')
+                                }]);
+                        }
+                        setSuccess('Conta criada com sucesso! Verifique seu email.');
+                    }
+                } catch (error) {
+                    setError(error.message);
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            return (
+                <div className="auth-container">
+                    <div className="auth-form">
+                        <h2><i className="fas fa-comments"></i> Sistema de Suporte</h2>
+                        <div className="auth-tabs">
+                            <div className={`auth-tab ${isLogin ? 'active' : ''}`} onClick={() => setIsLogin(true)}>
+                                Entrar
+                            </div>
+                            <div className={`auth-tab ${!isLogin ? 'active' : ''}`} onClick={() => setIsLogin(false)}>
+                                Cadastrar
+                            </div>
+                        </div>
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label>Email:</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Senha:</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <button type="submit" className="auth-button" disabled={loading}>
+                                {loading ? 'Carregando...' : isLogin ? 'Entrar' : 'Cadastrar'}
+                            </button>
+                        </form>
+                        {error && <div className="error">{error}</div>}
+                        {success && <div className="success">{success}</div>}
+                        <div style={{marginTop: '20px', fontSize: '14px', color: '#6b7280', textAlign: 'center'}}>
+                            <p>Dica: Use um email com "admin" para se tornar administrador</p>
+                            <p>Ex: admin@exemplo.com</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Componente de Formulário de Ticket
+        function TicketForm({ onCreated }) {
+            const [title, setTitle] = React.useState('');
+            const [loading, setLoading] = React.useState(false);
+            const [error, setError] = React.useState('');
+
+            async function handleSubmit(e) {
+                e.preventDefault();
+                if (!title.trim()) {
+                    setError('Por favor, digite um título para o ticket');
+                    return;
+                }
+
+                setLoading(true);
+                setError('');
+
+                try {
+                    const { error } = await supabase
+                        .from('tickets')
+                        .insert([{ 
+                            title: title.trim(),
+                            status: 'aberto',
+                            created_at: new Date().toISOString()
+                        }]);
+
+                    if (error) throw error;
+
+                    setTitle('');
+                    onCreated();
+                } catch (error) {
+                    setError(error.message);
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            return (
+                <div className="ticket-form">
+                    <form onSubmit={handleSubmit}>
+                        <input
+                            type="text"
+                            placeholder="Título do ticket"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            disabled={loading}
+                            maxLength={100}
+                        />
+                        <button type="submit" disabled={loading || !title.trim()}>
+                            {loading ? 'Criando...' : 'Criar Ticket'}
+                        </button>
+                    </form>
+                    {error && <div className="error">{error}</div>}
+                </div>
+            );
+        }
+
+        // Componente de Lista de Tickets
+        function TicketList({ onSelect }) {
+            const [tickets, setTickets] = React.useState([]);
+            const [loading, setLoading] = React.useState(true);
+
+            React.useEffect(() => {
+                async function fetchTickets() {
+                    setLoading(true);
+                    try {
+                        const { data, error } = await supabase
+                            .from('tickets')
+                            .select('*')
+                            .order('created_at', { ascending: false });
+                        
+                        if (error) throw error;
+                        
+                        setTickets(data || []);
+                    } catch (error) {
+                        console.error('Erro ao carregar tickets:', error);
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+
+                fetchTickets();
+
+                // Inscrever para atualizações em tempo real
+                const subscription = supabase
+                    .channel('tickets-channel')
+                    .on('postgres_changes', 
+                        { event: 'INSERT', schema: 'public', table: 'tickets' }, 
+                        (payload) => {
+                            setTickets(prev => [payload.new, ...prev]);
+                        }
+                    )
+                    .subscribe();
+
+                return () => {
+                    supabase.removeChannel(subscription);
+                };
+            }, []);
+
+            if (loading) return <div className="loading">Carregando tickets...</div>;
+            if (tickets.length === 0) return <div className="empty-state">Nenhum ticket encontrado.</div>;
+
+            return (
+                <div className="ticket-list">
+                    {tickets.map(ticket => (
+                        <div key={ticket.id} className="ticket-item" onClick={() => onSelect(ticket)}>
+                            <div className="ticket-title">{ticket.title}</div>
+                            <div className="ticket-meta">
+                                <span>{ticket.status}</span>
+                                <span>{new Date(ticket.created_at).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        // Componente de Interface de Chat
+        function ChatInterface({ ticketId, onBack }) {
+            const [messages, setMessages] = React.useState([]);
+            const [newMessage, setNewMessage] = React.useState('');
+            const [loading, setLoading] = React.useState(true);
+            const bottomRef = React.useRef(null);
+
+            React.useEffect(() => {
+                async function fetchMessages() {
+                    setLoading(true);
+                    try {
+                        const { data, error } = await supabase
+                            .from('ticket_responses')
+                            .select('*')
+                            .eq('ticket_id', ticketId)
+                            .order('created_at', { ascending: true });
+                        
+                        if (error) throw error;
+                        
+                        setMessages(data || []);
+                    } catch (error) {
+                        console.error('Erro ao carregar mensagens:', error);
+                    } finally {
+                        setLoading(false);
+                    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+
+                fetchMessages();
+
+                // Inscrever para novas mensagens em tempo real
+                const subscription = supabase
+                    .channel(`ticket-${ticketId}`)
+                    .on('postgres_changes', 
+                        { 
+                            event: 'INSERT', 
+                            schema: 'public', 
+                            table: 'ticket_responses',
+                            filter: `ticket_id=eq.${ticketId}`
+                        }, 
+                        (payload) => {
+                            setMessages(prev => [...prev, payload.new]);
+                            setTimeout(() => {
+                                bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+                            }, 100);
+                        }
+                    )
+                    .subscribe();
+
+                return () => {
+                    supabase.removeChannel(subscription);
+                };
+            }, [ticketId]);
+
+            async function handleSend(e) {
+                e.preventDefault();
+                if (!newMessage.trim()) return;
+
+                try {
+                    const { error } = await supabase
+                        .from('ticket_responses')
+                        .insert([{ 
+                            ticket_id: ticketId, 
+                            message: newMessage,
+                            created_at: new Date().toISOString()
+                        }]);
+
+                    if (error) throw error;
+
+                    setNewMessage('');
+                } catch (error) {
+                    console.error('Erro ao enviar mensagem:', error);
+                }
+            }
+
+            if (loading) return <div className="loading">Carregando mensagens...</div>;
+
+            return (
+                <div className="chat-container">
+                    <div className="chat-header">
+                        <h2>Conversa do Ticket</h2>
+                        <button className="back-button" onClick={onBack}>
+                            Voltar
+                        </button>
+                    </div>
+                    <div className="messages-container">
+                        {messages.length > 0 ? (
+                            messages.map(msg => (
+                                <div key={msg.id} className="message sent">
+                                    <div className="message-content">
+                                        {msg.message}
+                                    </div>
+                                    <span className="message-time">
+                                        {new Date(msg.created_at).toLocaleTimeString()}
+                                    </span>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="empty-state">
+                                <i className="fas fa-comments"></i>
+                                <p>Nenhuma mensagem ainda. Envie uma mensagem para iniciar a conversa.</p>
+                            </div>
+                        )}
+                        <div ref={bottomRef} />
+                    </div>
+                    <form onSubmit={handleSend} className="message-input">
+                        <input
+                            type="text"
+                            placeholder="Digite sua mensagem..."
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            required
+                        />
+                        <button type="submit">
+                            <i className="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            );
+        }
+
+        // Componente Principal
+        function Home() {
+            const [user, setUser] = React.useState(null);
+            const [selectedTicket, setSelectedTicket] = React.useState(null);
+            const [refreshTickets, setRefreshTickets] = React.useState(0);
+
+            React.useEffect(() => {
+                // Verificar se há usuário logado
+                const session = supabase.auth.getSession();
+                
+                session.then(({ data: { session } }) => {
+                    if (session) {
+                        setUser(session.user);
+                    }
+                });
+
+                // Ouvir mudanças no estado de autenticação
+                const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+                    setUser(session?.user || null);
+                });
+
+                return () => subscription.unsubscribe();
+            }, []);
+
+            if (!user) {
+                return <AuthComponent />;
+            }
+
+            return (
+                <div className="container">
+                    <header>
+                        <div className="logo">
+                            <i className="fas fa-comments"></i>
+                            <h1>Sistema de Suporte</h1>
+                        </div>
+                        <div className="user-info">
+                            <span>{user.email}</span>
+                            <span className={`user-badge ${user.email.includes('admin') ? 'admin' : 'user'}`}>
+                                {user.email.includes('admin') ? 'Administrador' : 'Usuário'}
+                            </span>
+                            <button 
+                                onClick={() => supabase.auth.signOut()}
+                                style={{background: 'transparent', border: '1px solid white', color: 'white', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer'}}
+                            >
+                                Sair
+                            </button>
+                        </div>
+                    </header>
+                    
+                    <div className="main-content">
+                        {!selectedTicket ? (
+                            <>
+                                <div className="sidebar">
+                                    <TicketForm onCreated={() => setRefreshTickets(prev => prev + 1)} />
+                                    <TicketList onSelect={setSelectedTicket} />
+                                </div>
+                                <div className="chat-container">
+                                    <div className="empty-state">
+                                        <i className="fas fa-comment-dots"></i>
+                                        <h2>Bem-vindo ao Sistema de Suporte</h2>
+                                        <p>Selecione um ticket para visualizar a conversa ou crie um novo ticket.</p>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <ChatInterface 
+                                ticketId={selectedTicket.id} 
+                                onBack={() => setSelectedTicket(null)}
+                            />
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Renderizar a aplicação
+        ReactDOM.render(<Home />, document.getElementById('root'));
+    </script>
+</body>
+</html>

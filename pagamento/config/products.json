@@ -1,0 +1,28 @@
+{
+    "products":[
+        {
+            "id":1,
+            "titulo":"lala",
+            "descricao":"mega top",
+            "img":"/imagens/info.jpg",
+            "preco":45
+
+        },
+         {
+            "id": 2,
+            "titulo":"bebe",
+            "descricao":"mega show",
+            "img":"/imagens/garfield.jpg",
+            "preco":37
+
+        },
+         {
+            "id": 3,
+            "titulo":"gaga",
+            "descricao":"mega top",
+            "img":"/imagens/info.jpg",
+            "preco":62
+
+        }
+    ]
+}
