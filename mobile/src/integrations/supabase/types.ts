@@ -152,6 +152,59 @@ export type Database = {
         }
         Relationships: []
       }
+
+   
+      compras_experiencias: {
+        Row: {
+          id: number;
+          user_id: string;
+          experiencia_id: number;
+          data_compra: string;
+          status: string;
+          valor: number;
+          detalhes_pagamento: Json | null;
+          created_at: string;
+          quantidade_ingressos;
+        };
+        Insert: {
+          id?: number;
+          user_id: string;
+          experiencia_id: number;
+          data_compra?: string;
+          status?: string;
+          valor: number;
+          detalhes_pagamento?: Json | null;
+          created_at?: string;
+          quantidade_ingressos;
+        };
+        Update: {
+          id?: number;
+          user_id?: string;
+          experiencia_id?: number;
+          data_compra?: string;
+          status?: string;
+          valor?: number;
+          detalhes_pagamento?: Json | null;
+          created_at?: string;
+          quantidade_ingressos;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "compras_experiencias_experiencia_id_fkey"
+            columns: ["experiencia_id"]
+            referencedRelation: "experiencias_dis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compras_experiencias_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ];
+      }
+
+ 
       favoritos: {
         Row: {
           created_at: string

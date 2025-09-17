@@ -142,7 +142,7 @@ async function getAccessToken() {
   }
 }
 
-router.post('/create-paypal-order', async (req, res) => {
+/*router.post('/create-paypal-order', async (req, res) => {
   try {
     console.log('Received PayPal order request:', req.body);
     
@@ -170,6 +170,78 @@ router.post('/create-paypal-order', async (req, res) => {
             currency_code: 'BRL',
             value: amount.toFixed(2)
           }
+        }]
+      })
+    });
+
+    const responseText = await orderResponse.text();
+    console.log('PayPal response:', orderResponse.status, responseText);
+
+    if (!orderResponse.ok) {
+      return res.status(orderResponse.status).json({ 
+        error: 'Erro ao criar ordem PayPal',
+        details: responseText 
+      });
+    }
+
+    const orderData = JSON.parse(responseText);
+    res.json(orderData);
+
+  } catch (error) {
+    console.error('Error in create-paypal-order:', error);
+    res.status(500).json({ 
+      error: 'Erro interno',
+      message: error.message 
+    });
+  }
+});*/
+
+
+// api/payments.js
+router.post('/create-paypal-order', async (req, res) => {
+  try {
+    console.log('Received PayPal order request:', req.body);
+    
+    const { experienceId, amount, quantity } = req.body;
+    if (!experienceId || amount === undefined) {
+      return res.status(400).json({ 
+        error: 'Dados incompletos',
+        message: 'experienceId e amount são obrigatórios' 
+      });
+    }
+
+    const accessToken = await getAccessToken();
+    console.log('Got access token');
+
+    const orderResponse = await fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        intent: 'CAPTURE',
+        purchase_units: [{
+          amount: {
+            currency_code: 'BRL',
+            value: amount.toFixed(2),
+            breakdown: {
+              item_total: {
+                currency_code: 'BRL',
+                value: amount.toFixed(2)
+              }
+            }
+          },
+          items: [
+            {
+              name: `Ingresso para Experiência ${experienceId}`,
+              quantity: quantity.toString(),
+              unit_amount: {
+                currency_code: 'BRL',
+                value: (amount / quantity).toFixed(2)
+              }
+            }
+          ]
         }]
       })
     });

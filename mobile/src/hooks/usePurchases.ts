@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import type { Database } from '@/integrations/supabase/types';
 
 interface Purchase {
   id: number;
@@ -37,6 +38,12 @@ export const usePurchases = () => {
       setLoading(false);
     }
   }, [user]);
+
+
+  type Purchase = Database['public']['Tables']['compras_experiencias']['Row'] & {
+  experiencias_dis: Database['public']['Tables']['experiencias_dis']['Row'];
+};
+
 
   const fetchPurchases = async () => {
     try {

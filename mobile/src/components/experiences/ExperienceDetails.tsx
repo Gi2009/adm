@@ -5,11 +5,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, MapPin, Users, Clock, DollarSign } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, DollarSign, Plus, Minus, CheckCircle } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { useUser  } from '@supabase/auth-helpers-react';
-import type { Database } from '@/integrations/supabase/types'; // ajuste o caminho conforme seu projeto
+import type { Database } from '@/integrations/supabase/types';
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 declare global {
   interface Window {
@@ -35,59 +37,83 @@ interface ExperienceDetailsProps {
   experience: Experience | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isPurchaseView?: boolean; // Adicione esta prop
 }
 
-// ✅ MOVER A FUNÇÃO formatDate PARA CIMA, ANTES DO COMPONENTE
 const formatDate = (dateString: string) => {
   if (!dateString) return '';
   return new Date(dateString).toLocaleDateString('pt-BR');
 };
 
-const ExperienceDetails = ({ experience, open, onOpenChange }: ExperienceDetailsProps) => {
+const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = false }: ExperienceDetailsProps) => {
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-   //const user = useUser ();
-    const { user, signOut } = useAuth();
+  const [ticketQuantity, setTicketQuantity] = useState(1);
+  const { user } = useAuth();
 
-console.log('Usuário atual:', user);
+  console.log('Usuário atual:', user);
 
-   const handlePaymentSuccess = useCallback(async (details: any) => {
-  console.log('Pagamento bem-sucedido:', details);
-  setPaymentSuccess(true);
-   if (!user) {
+  const handlePaymentSuccess = useCallback(async (details: any) => {
+    console.log('Pagamento bem-sucedido:', details);
+    setPaymentSuccess(true);
+    
+    if (!user) {
       console.warn('Usuário não autenticado');
       return;
-    }else{
-
-
-  // Salvar a compra no banco de dados com tipos corretos
-  if (user && experience) {
-    try {
-      const { error } = await supabase
-        .from('compras_experiencias')
-        .insert({
-          user_id: user.id,
-          experiencia_id: experience.id,
-          data_compra: new Date().toISOString(),
-          status: 'confirmado',
-          valor: experience.preco,
-          detalhes_pagamento: details
-        } as Database['public']['Tables']['compras_experiencias']['Insert']);
-
-      if (error) {
-        console.error('Erro ao salvar compra:', error);
-      } else {
-        console.log('Compra salva com sucesso');
-      }
-    } catch (error) {
-      console.error('Erro ao salvar compra:', error);
     }
-  }
-}}, [user, experience]);
+
+    if (user && experience) {
+      try {
+        const totalAmount = experience.preco * ticketQuantity;
+        
+        const { error } = await supabase
+          .from('compras_experiencias')
+          .insert({
+            user_id: user.id,
+            experiencia_id: experience.id,
+            data_compra: new Date().toISOString(),
+            status: 'confirmado',
+            valor: totalAmount,
+            quantidade_ingressos: ticketQuantity,
+            detalhes_pagamento: details
+          } as Database['public']['Tables']['compras_experiencias']['Insert']);
+
+        if (error) {
+          console.error('Erro ao salvar compra:', error);
+        } else {
+          console.log('Compra salva com sucesso');
+        }
+      } catch (error) {
+        console.error('Erro ao salvar compra:', error);
+      }
+    }
+  }, [user, experience, ticketQuantity]);
+
+  const increaseQuantity = () => {
+    if (experience && ticketQuantity < experience.quantas_p) {
+      setTicketQuantity(ticketQuantity + 1);
+    }
+  };
+
+  const decreaseQuantity = () => {
+    if (ticketQuantity > 1) {
+      setTicketQuantity(ticketQuantity - 1);
+    }
+  };
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value >= 1 && experience && value <= experience.quantas_p) {
+      setTicketQuantity(value);
+    }
+  };
 
   useEffect(() => {
+    if (isPurchaseView) return; // Não carrega PayPal se for visualização de compra
+    
     if (!open) {
       setPaymentSuccess(false);
+      setTicketQuantity(1);
       return;
     }
 
@@ -105,79 +131,83 @@ console.log('Usuário atual:', user);
     };
 
     loadPaypal();
-  }, [open]);
+  }, [open, isPurchaseView]);
 
   useEffect(() => {
-  if (!paypalLoaded || !experience || !open) return;
+    if (isPurchaseView) return; // Não renderiza PayPal se for visualização de compra
+    
+    if (!paypalLoaded || !experience || !open) return;
 
-  const container = document.getElementById('paypal-button-container');
-  if (!container) return;
+    const container = document.getElementById('paypal-button-container');
+    if (!container) return;
 
-  container.innerHTML = '';
+    container.innerHTML = '';
 
-  // Cria a instância do botão PayPal
-  const paypalButtons = window.paypal.Buttons({
-    style: {
-      layout: 'vertical',
-      color: 'blue',
-      shape: 'rect',
-      label: 'paypal'
-    },
-    createOrder: async function(data: any, actions: any) {
-      try {
-        if (!experience) throw new Error("Experiência não definida");
+    const totalAmount = experience.preco * ticketQuantity;
 
-        console.log('Criando ordem para:', experience.id);
-        
-        const response = await fetch('http://localhost:3000/api/create-paypal-order', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            experienceId: experience.id,
-            amount: experience.preco
-          }),
-        });
+    const paypalButtons = window.paypal.Buttons({
+      style: {
+        layout: 'vertical',
+        color: 'blue',
+        shape: 'rect',
+        label: 'paypal'
+      },
+      createOrder: async function(data: any, actions: any) {
+        try {
+          if (!experience) throw new Error("Experiência não definida");
 
-        console.log('Resposta do servidor:', response.status);
+          console.log('Criando ordem para:', experience.id, 'Quantidade:', ticketQuantity, 'Total:', totalAmount);
+          
+          const response = await fetch('http://localhost:3000/api/create-paypal-order', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              experienceId: experience.id,
+              amount: totalAmount,
+              quantity: ticketQuantity
+            }),
+          });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Erro detalhado:', errorText);
-          throw new Error(`Erro do servidor: ${response.status}`);
+          console.log('Resposta do servidor:', response.status);
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Erro detalhado:', errorText);
+            throw new Error(`Erro do servidor: ${response.status}`);
+          }
+
+          const orderData = await response.json();
+          console.log('Ordem criada com sucesso:', orderData);
+          return orderData.id;
+
+        } catch (error) {
+          console.error('Erro detalhado ao criar ordem:', error);
+          throw new Error('Não foi possível processar o pagamento. Tente novamente.');
         }
-
-        const orderData = await response.json();
-        console.log('Ordem criada com sucesso:', orderData);
-        return orderData.id;
-
-      } catch (error) {
-        console.error('Erro detalhado ao criar ordem:', error);
-        throw new Error('Não foi possível processar o pagamento. Tente novamente.');
+      },
+      onApprove: function(data: any, actions: any) {
+        return actions.order.capture().then(function(details: any) {
+          handlePaymentSuccess(details);
+        });
+      },
+      onError: function(err: any) {
+        console.error('Erro no pagamento:', err);
+        alert('Ocorreu um erro durante o pagamento. Por favor, tente novamente.');
       }
-    },
-    onApprove: function(data: any, actions: any) {
-      return actions.order.capture().then(function(details: any) {
-        handlePaymentSuccess(details);
-      });
-    },
-    onError: function(err: any) {
-      console.error('Erro no pagamento:', err);
-      alert('Ocorreu um erro durante o pagamento. Por favor, tente novamente.');
-    }
-  });
+    });
 
-  // Renderiza o botão no container
-  paypalButtons.render(container);
+    paypalButtons.render(container);
 
-  // Função de limpeza para destruir o botão ao desmontar ou mudar dependências
-  return () => {
-    paypalButtons.close();
-  };
-}, [paypalLoaded, experience, open, handlePaymentSuccess]);
+    return () => {
+      paypalButtons.close();
+    };
+  }, [paypalLoaded, experience, open, handlePaymentSuccess, ticketQuantity, isPurchaseView]);
 
   if (!experience) return null;
+
+  const totalAmount = experience.preco * ticketQuantity;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -206,19 +236,19 @@ console.log('Usuário atual:', user);
             
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-primary" />
-              <span className="text-sm text-muted-foreground">Preço:</span>
+              <span className="text-sm text-muted-foreground">Preço unitário:</span>
               <span className="font-bold text-primary">R$ {experience.preco.toFixed(2)}</span>
             </div>
 
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-primary" />
-              <span className="text-sm text-muted-foreground">Pessoas:</span>
+              <span className="text-sm text-muted-foreground">Vagas disponíveis:</span>
               <span className="font-medium">{experience.quantas_p}</span>
             </div>
 
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-primary" />
-              <span className="text-sm text-muted-foreground">Duração:</span>
+              <span className="text-sm text-muted-foreground">Data:</span>
               <span className="font-medium">{formatDate(experience.data_experiencia || '')}</span>
             </div>
           </div>
@@ -248,14 +278,79 @@ console.log('Usuário atual:', user);
                   </svg>
                   <h4 className="font-semibold">Pagamento realizado com sucesso!</h4>
                 </div>
-                <p className="text-green-600 mt-2">Sua experiência foi reservada. Você receberá um e-mail com os detalhes.</p>
+                <p className="text-green-600 mt-2">
+                  {ticketQuantity} {ticketQuantity === 1 ? 'ingresso' : 'ingressos'} comprado(s) com sucesso. 
+                  Você receberá um e-mail com os detalhes.
+                </p>
+              </div>
+            ) : isPurchaseView ? (
+              // Visualização de compra - sem opção de comprar
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <div className="flex items-center gap-2 text-blue-700">
+                  <CheckCircle className="h-6 w-6" />
+                  <h4 className="font-semibold">Experiência Comprada</h4>
+                </div>
+                <p className="text-blue-600 mt-2">
+                  Você já adquiriu esta experiência. Aproveite sua aventura!
+                </p>
               </div>
             ) : (
+              // Visualização normal - com opção de compra
               <>
                 <h4 className="font-semibold mb-4 text-foreground">Reservar esta experiência</h4>
+                
+                {/* Seletor de quantidade */}
                 <div className="bg-muted p-4 rounded-lg mb-4">
-                  <p className="text-sm text-muted-foreground">Valor total: <span className="font-bold text-primary">R$ {experience.preco.toFixed(2)}</span></p>
-                  <p className="text-xs text-muted-foreground mt-1">Pagamento seguro via PayPal</p>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-medium">Quantidade de ingressos:</span>
+                    <span className="text-xs text-muted-foreground">
+                      Máximo: {experience.quantas_p} {experience.quantas_p === 1 ? 'vaga' : 'vagas'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 mb-3">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={decreaseQuantity}
+                      disabled={ticketQuantity <= 1}
+                      className="h-8 w-8"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    
+                    <Input
+                      type="number"
+                      min="1"
+                      max={experience.quantas_p}
+                      value={ticketQuantity}
+                      onChange={handleQuantityChange}
+                      className="w-16 text-center h-8"
+                    />
+                    
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={increaseQuantity}
+                      disabled={ticketQuantity >= experience.quantas_p}
+                      className="h-8 w-8"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Preço unitário:</p>
+                      <p className="font-medium">R$ {experience.preco.toFixed(2)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">Total:</p>
+                      <p className="font-bold text-primary text-lg">R$ {totalAmount.toFixed(2)}</p>
+                    </div>
+                  </div>
+                  
+                  <p className="text-xs text-muted-foreground mt-3">Pagamento seguro via PayPal</p>
                 </div>
                 
                 {paypalLoaded ? (

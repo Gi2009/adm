@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { usePurchases } from "@/hooks/usePurchases";
 import { supabase } from "@/integrations/supabase/client";
-import ExperienceCard from "@/components/experiences/ExperienceCard";
 import ExperienceDetails from "@/components/experiences/ExperienceDetails";
-import { Loader2, ShoppingBag, Calendar, CheckCircle } from "lucide-react";
+import { Loader2, ShoppingBag, Calendar, CheckCircle, Users } from "lucide-react"; // Adicionei Users aqui
 
 interface Purchase {
   id: number;
@@ -15,6 +14,7 @@ interface Purchase {
   data_compra: string;
   status: string;
   valor: number;
+  quantidade_ingressos?: number; // Adicione esta linha
   experiencias_dis: {
     id: number;
     titulo: string;
@@ -130,6 +130,15 @@ const PurchasesPage = () => {
                             <span className="text-sm text-gray-600">Valor pago:</span>
                             <span className="font-bold text-blue-600">R$ {purchase.valor.toFixed(2)}</span>
                           </div>
+
+                          {/* Adicione esta seção para mostrar a quantidade de ingressos */}
+                          {purchase.quantidade_ingressos && (
+                            <div className="flex items-center gap-2">
+                              <Users className="h-4 w-4 text-blue-600" />
+                              <span className="text-sm text-gray-600">Ingressos:</span>
+                              <span className="font-medium">{purchase.quantidade_ingressos}</span>
+                            </div>
+                          )}
                         </div>
                         
                         <Button 
@@ -150,10 +159,11 @@ const PurchasesPage = () => {
       </main>
 
       <ExperienceDetails
-        experience={selectedExperience}
-        open={isDetailsOpen}
-        onOpenChange={setIsDetailsOpen}
-      />
+  experience={selectedExperience}
+  open={isDetailsOpen}
+  onOpenChange={setIsDetailsOpen}
+  isPurchaseView={true} // Adicione esta linha
+/>
     </div>
   );
 };
