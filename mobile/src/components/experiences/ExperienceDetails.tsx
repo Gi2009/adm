@@ -4,8 +4,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
 import { Calendar, MapPin, Users, Clock, DollarSign } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
+import { useUser  } from '@supabase/auth-helpers-react';
+import type { Database } from '@/integrations/supabase/types'; // ajuste o caminho conforme seu projeto
+import { useAuth } from "@/hooks/useAuth";
 
 declare global {
   interface Window {
@@ -42,11 +46,44 @@ const formatDate = (dateString: string) => {
 const ExperienceDetails = ({ experience, open, onOpenChange }: ExperienceDetailsProps) => {
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+   //const user = useUser ();
+    const { user, signOut } = useAuth();
 
-  const handlePaymentSuccess = useCallback((details: any) => {
-    console.log('Pagamento bem-sucedido:', details);
-    setPaymentSuccess(true);
-  }, []);
+console.log('Usuário atual:', user);
+
+   const handlePaymentSuccess = useCallback(async (details: any) => {
+  console.log('Pagamento bem-sucedido:', details);
+  setPaymentSuccess(true);
+   if (!user) {
+      console.warn('Usuário não autenticado');
+      return;
+    }else{
+
+
+  // Salvar a compra no banco de dados com tipos corretos
+  if (user && experience) {
+    try {
+      const { error } = await supabase
+        .from('compras_experiencias')
+        .insert({
+          user_id: user.id,
+          experiencia_id: experience.id,
+          data_compra: new Date().toISOString(),
+          status: 'confirmado',
+          valor: experience.preco,
+          detalhes_pagamento: details
+        } as Database['public']['Tables']['compras_experiencias']['Insert']);
+
+      if (error) {
+        console.error('Erro ao salvar compra:', error);
+      } else {
+        console.log('Compra salva com sucesso');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar compra:', error);
+    }
+  }
+}}, [user, experience]);
 
   useEffect(() => {
     if (!open) {
@@ -61,7 +98,7 @@ const ExperienceDetails = ({ experience, open, onOpenChange }: ExperienceDetails
       }
 
       const script = document.createElement('script');
-      script.src = 'https://www.paypal.com/sdk/js?client-id=sb&currency=BRL';
+      script.src = 'https://www.paypal.com/sdk/js?client-id=Ab8AUo6wjB0HVwXsS3llXpgW-ftWEtjEohTPtCKqcLHxdvaCMewGE3MNwPJLXV0u1P72l7BEDs9cEEFf&currency=BRL';
       script.async = true;
       script.onload = () => setPaypalLoaded(true);
       document.body.appendChild(script);
@@ -71,65 +108,74 @@ const ExperienceDetails = ({ experience, open, onOpenChange }: ExperienceDetails
   }, [open]);
 
   useEffect(() => {
-    if (paypalLoaded && experience && open) {
-      const container = document.getElementById('paypal-button-container');
-      if (container) {
-        container.innerHTML = '';
-      }
+  if (!paypalLoaded || !experience || !open) return;
 
-      window.paypal.Buttons({
-        style: {
-          layout: 'vertical',
-          color: 'blue',
-          shape: 'rect',
-          label: 'paypal'
-        },
-       createOrder: async function(data: any, actions: any) {
-  try {
-    if (!experience) throw new Error("Experiência não definida");
+  const container = document.getElementById('paypal-button-container');
+  if (!container) return;
 
-    console.log('Criando ordem para:', experience.id);
-    
-    const response = await fetch('http://localhost:3000/api/create-paypal-order', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        experienceId: experience.id,
-        amount: experience.preco
-      }),
-    });
+  container.innerHTML = '';
 
-    console.log('Resposta do servidor:', response.status);
+  // Cria a instância do botão PayPal
+  const paypalButtons = window.paypal.Buttons({
+    style: {
+      layout: 'vertical',
+      color: 'blue',
+      shape: 'rect',
+      label: 'paypal'
+    },
+    createOrder: async function(data: any, actions: any) {
+      try {
+        if (!experience) throw new Error("Experiência não definida");
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Erro detalhado:', errorText);
-      throw new Error(`Erro do servidor: ${response.status}`);
-    }
+        console.log('Criando ordem para:', experience.id);
+        
+        const response = await fetch('http://localhost:3000/api/create-paypal-order', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            experienceId: experience.id,
+            amount: experience.preco
+          }),
+        });
 
-    const orderData = await response.json();
-    console.log('Ordem criada com sucesso:', orderData);
-    return orderData.id;
+        console.log('Resposta do servidor:', response.status);
 
-  } catch (error) {
-    console.error('Erro detalhado ao criar ordem:', error);
-    throw new Error('Não foi possível processar o pagamento. Tente novamente.');
-  }
-},
-        onApprove: function(data: any, actions: any) {
-          return actions.order.capture().then(function(details: any) {
-            handlePaymentSuccess(details);
-          });
-        },
-        onError: function(err: any) {
-          console.error('Erro no pagamento:', err);
-          alert('Ocorreu um erro durante o pagamento. Por favor, tente novamente.');
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Erro detalhado:', errorText);
+          throw new Error(`Erro do servidor: ${response.status}`);
         }
-      }).render('#paypal-button-container');
+
+        const orderData = await response.json();
+        console.log('Ordem criada com sucesso:', orderData);
+        return orderData.id;
+
+      } catch (error) {
+        console.error('Erro detalhado ao criar ordem:', error);
+        throw new Error('Não foi possível processar o pagamento. Tente novamente.');
+      }
+    },
+    onApprove: function(data: any, actions: any) {
+      return actions.order.capture().then(function(details: any) {
+        handlePaymentSuccess(details);
+      });
+    },
+    onError: function(err: any) {
+      console.error('Erro no pagamento:', err);
+      alert('Ocorreu um erro durante o pagamento. Por favor, tente novamente.');
     }
-  }, [paypalLoaded, experience, open, handlePaymentSuccess]);
+  });
+
+  // Renderiza o botão no container
+  paypalButtons.render(container);
+
+  // Função de limpeza para destruir o botão ao desmontar ou mudar dependências
+  return () => {
+    paypalButtons.close();
+  };
+}, [paypalLoaded, experience, open, handlePaymentSuccess]);
 
   if (!experience) return null;
 

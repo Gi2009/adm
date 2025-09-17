@@ -7,7 +7,7 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: "http://localhost:8080",
+  origin: ["http://localhost:8080", "http://127.0.0.1:8080"],
   credentials: true
 }));
 
@@ -48,9 +48,6 @@ try {
 }
 
 // ✅ CORREÇÃO: Use um middleware padrão para rotas não encontradas
-// Remova completamente a linha com app.use('*', ...) e use esta abordagem:
-
-// Esta deve ser a ÚLTIMA rota definida
 app.use((req, res, next) => {
   console.log('❌ Rota não encontrada:', req.originalUrl);
   res.status(404).json({ 
@@ -66,4 +63,5 @@ app.listen(3000, () => {
   console.log('   - GET  /test');
   console.log('   - GET  /api/test');
   console.log('   - POST /api/create-paypal-order');
+  console.log('📝 PayPal Client ID:', process.env.PAYPAL_CLIENT_ID ? '✅ Definido' : '❌ Não definido');
 });

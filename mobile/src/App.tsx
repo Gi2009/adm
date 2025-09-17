@@ -17,6 +17,7 @@ import BottomNavbar from "./components/layout/BottomNavbar";
 import EditProfile from "./pages/EditProfile";
 import OnboardingFlow from "./pages/OnboardingFlow";
 import ResetPassword from "./pages/ResetPassword";
+import PurchasesPage from "./pages/Purchase";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,12 @@ const App = () => (
             <Route path="/favorites" element={
               <ProtectedRoute>
                 <Favorites />
+                <BottomNavbar />
+              </ProtectedRoute>
+            } />
+            <Route path="/purchases" element={
+              <ProtectedRoute>
+                <PurchasesPage/>
                 <BottomNavbar />
               </ProtectedRoute>
             } />

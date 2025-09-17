@@ -85,10 +85,12 @@ const Welcome = ({ onContinue }: WelcomeProps) => {
       </div>
 
       <div className="relative text-center space-y-8 max-w-2xl z-10">
-        {/* Logo/Ícone */}
-        <div className="flex items-center justify-center mb-8">
-          <CanoeIcon />
-        </div>
+              {/* Logo/Ícone */}
+              <img 
+        src="/kanoa_com.png" 
+        alt="Logo" 
+        /*className="w-8 h-8 object-contain rounded-full" */
+      />
 
         {/* Título */}
         <div className="space-y-4">
