@@ -224,7 +224,7 @@ const AdminRegistration = () => {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          className="absolute right-0 top-0 h-full px-3 py-2 bg-blue-100 hover:bg-blue-200 text-white-700"
                           onClick={() => setShowPassword(!showPassword)}
                         >
                           {showPassword ? (
@@ -257,7 +257,7 @@ const AdminRegistration = () => {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          className="absolute right-0 top-0 h-full px-3 py-2 bg-blue-100 hover:bg-blue-200 text-white-700"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         >
                           {showConfirmPassword ? (
@@ -273,7 +273,7 @@ const AdminRegistration = () => {
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
