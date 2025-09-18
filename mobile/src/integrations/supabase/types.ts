@@ -273,6 +273,34 @@ export type Database = {
         }
         Relationships: []
       }
+
+      dados_bancarios: {
+        Row: {
+        user_id?: string
+        email_paypal?: string
+        nome_titular?: string
+        cpf_titular?: string
+        created_at?: string
+        updated_at ?: string
+        }
+        Insert: {
+           user_id?: string
+        email_paypal?: string
+        nome_titular?: string
+        cpf_titular?: string
+        created_at?: string
+        updated_at ?: string
+        }
+        Update: {
+          user_id?: string
+        email_paypal?: string
+        nome_titular?: string
+        cpf_titular?: string
+        created_at?: string
+        updated_at ?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

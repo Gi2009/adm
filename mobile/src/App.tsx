@@ -18,6 +18,7 @@ import EditProfile from "./pages/EditProfile";
 import OnboardingFlow from "./pages/OnboardingFlow";
 import ResetPassword from "./pages/ResetPassword";
 import PurchasesPage from "./pages/Purchase";
+import PaypalRegistration from "./pages/PaypalRegistration";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +73,13 @@ const App = () => (
                 <BottomNavbar />
               </ProtectedRoute>
             } />
+            // Adicione esta rota junto com as outras
+          <Route path="/paypal-registration" element={
+            <ProtectedRoute>
+            <PaypalRegistration/> 
+            <BottomNavbar />
+          </ProtectedRoute>
+          } />
              <Route path="/reset-password" element={<ResetPassword />} />
              <Route path="/editprofile" element={<EditProfile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
