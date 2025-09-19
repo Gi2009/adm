@@ -28,11 +28,11 @@ const Auth = () => {
           {/* Header */}
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center mb-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
+                  <div className="w-16 h-16 bg-blue-100 from-primary to-accent rounded-full flex items-center justify-center">
                     <img 
   src="/kanoa_logo.png" 
   alt="Logo" 
-  className="w-25 h-25 object-contain rounded-full" 
+  className="w-full h-full object-cover " 
 />
               </div>
             </div>

@@ -45,70 +45,56 @@ const Profile = () => {
   };
 
   const handleAvatarUpload = async (file: File) => {
-    if (!user) return;
-    
-    setIsUploading(true);
-    try {
-      // Verificar se o bucket 'experiencias_img' existe
-      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
-      
-      if (listError) {
-        console.error('Erro ao listar buckets:', listError);
-        throw new Error('Não foi possível acessar o storage');
-      }
+  if (!user) return;
+  
+  setIsUploading(true);
+  try {
+    // Upload da imagem para o Supabase Storage
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}-${Date.now()}.${fileExt}`;
 
-      const experienceImagesBucket = buckets.find(bucket => bucket.name === 'experiencias_img');
-      
-      if (!experienceImagesBucket) {
-        throw new Error('Bucket de imagens não encontrado');
-      }
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(fileName, file, { upsert: true });
 
-      // Upload da imagem para o Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `avatars/${user.id}-${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('experiencias_img')
-        .upload(fileName, file, { upsert: true });
-
-      if (uploadError) {
-        console.error('Erro no upload:', uploadError);
-        throw uploadError;
-      }
-
-      // Obter a URL pública da imagem
-      const { data: { publicUrl } } = supabase.storage
-        .from('experiencias_img')
-        .getPublicUrl(fileName);
-
-      // Atualizar o perfil do usuário com a nova URL do avatar
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ foto_usu: publicUrl })
-        .eq('user_id', user.id);
-
-      if (updateError) {
-        console.error('Erro ao atualizar perfil:', updateError);
-        throw updateError;
-      }
-
-      setAvatarUrl(publicUrl);
-      
-      toast({
-        title: "Sucesso",
-        description: "Foto de perfil atualizada com sucesso!",
-      });
-    } catch (error) {
-      console.error('Erro ao fazer upload do avatar:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível fazer upload da imagem. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
+    if (uploadError) {
+      console.error('Erro no upload:', uploadError);
+      throw uploadError;
     }
-  };
+
+    // Obter a URL pública da imagem
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(fileName);
+
+    // Atualizar o perfil do usuário com a nova URL do avatar
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ foto_usu: publicUrl })
+      .eq('user_id', user.id);
+
+    if (updateError) {
+      console.error('Erro ao atualizar perfil:', updateError);
+      throw updateError;
+    }
+
+    setAvatarUrl(publicUrl);
+    
+    toast({
+      title: "Sucesso",
+      description: "Foto de perfil atualizada com sucesso!",
+    });
+  } catch (error) {
+    console.error('Erro ao fazer upload do avatar:', error);
+    toast({
+      title: "Erro",
+      description: "Não foi possível fazer upload da imagem. Tente novamente.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsUploading(false);
+  }
+};
 
   const handleOfferExperience = () => {
     if (userType === '2') {
