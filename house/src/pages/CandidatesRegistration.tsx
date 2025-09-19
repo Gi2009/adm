@@ -231,7 +231,7 @@ const CandidateRegistration = () => {
 
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full bg-cyan-500 hover:bg-cyan-600 text-black" 
               disabled={registering}
             >
               {registering ? (

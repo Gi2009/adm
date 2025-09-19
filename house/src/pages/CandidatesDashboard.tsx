@@ -284,7 +284,7 @@ const CandidatesDashboard = () => {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {candidates.map((candidate) => (
-              <Card key={candidate.id} className="hover:shadow-lg transition-shadow">
+              <Card key={candidate.id} className="hover:shadow-lg transition-shadow rounded-lg">
                 <CardHeader>
                   <CardTitle className="text-lg">
                     {candidate.nome || "Nome não informado"}
@@ -358,7 +358,7 @@ const CandidatesDashboard = () => {
                     <Button
                       onClick={() => handleApprove(candidate)}
                       disabled={processingId === candidate.id}
-                      className="flex-1"
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white-1"
                       size="sm"
                     >
                       {processingId === candidate.id ? (
@@ -374,7 +374,7 @@ const CandidatesDashboard = () => {
                       onClick={() => handleReject(candidate)}
                       disabled={processingId === candidate.id}
                       variant="destructive"
-                      className="flex-1"
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white-1"
                       size="sm"
                     >
                       {processingId === candidate.id ? (
