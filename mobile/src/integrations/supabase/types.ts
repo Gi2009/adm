@@ -28,6 +28,8 @@ export type Database = {
           municipio: string | null
           nome: string | null
           telefone: string | null
+           url_foto_documento: string| null
+           url_comprovante_endereco: string| null
         }
         Insert: {
           associacao?: string | null
@@ -42,6 +44,8 @@ export type Database = {
           municipio?: string | null
           nome?: string | null
           telefone?: string | null
+           url_foto_documento: string| null
+           url_comprovante_endereco: string| null
         }
         Update: {
           associacao?: string | null
@@ -56,6 +60,8 @@ export type Database = {
           municipio?: string | null
           nome?: string | null
           telefone?: string | null
+           url_foto_documento: string| null
+           url_comprovante_endereco: string| null
         }
         Relationships: []
       }
@@ -245,7 +251,8 @@ export type Database = {
           telefone: string
           type: string
           updated_at: string
-          user_id: string
+          user_id: string,
+          foto_usu: string
         }
         Insert: {
           associação?: string | null
@@ -257,7 +264,8 @@ export type Database = {
           telefone: string
           type: string
           updated_at?: string
-          user_id: string
+          user_id: string,
+          foto_usu: string
         }
         Update: {
           associação?: string | null
@@ -269,7 +277,8 @@ export type Database = {
           telefone?: string
           type?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string,
+          foto_usu: string
         }
         Relationships: []
       }

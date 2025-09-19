@@ -9,7 +9,15 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUpload } from "@/components/ui/image-upload";
 
+
+/*  <ImageUpload
+                  value={formData.img}
+                  onChange={(url) => setFormData({...formData, img: url})}
+                  onRemove={() => setFormData({...formData, img: ''})}
+                />
+*/
 export const ProviderApplication = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -28,7 +36,9 @@ export const ProviderApplication = () => {
     associacao: "",
     nome_ass: "", 
     cpf: "",
-    cont_ass: ""
+    cont_ass: "",
+    url_foto_documento: "",
+    url_comprovante_endereco: ""
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,7 +63,9 @@ export const ProviderApplication = () => {
         comunidade: formData.communityName,
         associacao: formData.associacao === "yes" ? formData.nome_ass : null,
         cont_asso: formData.associacao === "yes" ? formData.cont_ass : null,
-        exp_prevista: formData.experience
+        exp_prevista: formData.experience,
+        url_foto_documento: formData.url_foto_documento,
+        url_comprovante_endereco: formData.url_comprovante_endereco
       };
 
       const { error } = await supabase
@@ -220,6 +232,20 @@ export const ProviderApplication = () => {
                 </div>
               )}
 
+
+               {formData.isCommunityMember === "yes" && (
+                <div className="space-y-2">
+                  <Label htmlFor="documento">Foto do documeto</Label>
+                  <ImageUpload
+                  value={formData.url_foto_documento}
+                  onChange={(url) => setFormData({...formData, url_foto_documento: url})}
+                  onRemove={() => setFormData({...formData, url_foto_documento: ''})}
+                 />
+
+                </div>
+              )}
+
+             
               {formData.isCommunityMember === "yes" && (
                 <div className="space-y-2">
                   <Label htmlFor="idade">Idade</Label>
@@ -262,6 +288,18 @@ export const ProviderApplication = () => {
                     }
                     required
                   />
+                </div>
+              )}
+
+               {formData.isCommunityMember === "yes" && (
+                <div className="space-y-2">
+                  <Label htmlFor="documento">Comprovante de endereço</Label>
+                  <ImageUpload
+                  value={formData.url_comprovante_endereco}
+                  onChange={(url) => setFormData({...formData,url_comprovante_endereco: url})}
+                  onRemove={() => setFormData({...formData, url_comprovante_endereco: ''})}
+                 />
+
                 </div>
               )}
 

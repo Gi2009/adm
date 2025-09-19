@@ -1,18 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
 import { User, Mail, Calendar, Edit, Plus, Heart, LogOut, Edit3, ShoppingBag, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const Profile = () => {
   const { user, signOut } = useAuth();
   const { favorites } = useFavorites();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [userType, setUserType] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     fetchUserProfile();
@@ -24,14 +28,85 @@ const Profile = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('type')
+        .select('type, foto_usu')
         .eq('user_id', user.id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao buscar perfil:', error);
+        return;
+      }
+      
       setUserType(data?.type || null);
+      setAvatarUrl(data?.foto_usu || null);
     } catch (error) {
       console.error('Erro ao buscar perfil:', error);
+    }
+  };
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!user) return;
+    
+    setIsUploading(true);
+    try {
+      // Verificar se o bucket 'experiencias_img' existe
+      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+      
+      if (listError) {
+        console.error('Erro ao listar buckets:', listError);
+        throw new Error('Não foi possível acessar o storage');
+      }
+
+      const experienceImagesBucket = buckets.find(bucket => bucket.name === 'experiencias_img');
+      
+      if (!experienceImagesBucket) {
+        throw new Error('Bucket de imagens não encontrado');
+      }
+
+      // Upload da imagem para o Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `avatars/${user.id}-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('experiencias_img')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) {
+        console.error('Erro no upload:', uploadError);
+        throw uploadError;
+      }
+
+      // Obter a URL pública da imagem
+      const { data: { publicUrl } } = supabase.storage
+        .from('experiencias_img')
+        .getPublicUrl(fileName);
+
+      // Atualizar o perfil do usuário com a nova URL do avatar
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ foto_usu: publicUrl })
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        console.error('Erro ao atualizar perfil:', updateError);
+        throw updateError;
+      }
+
+      setAvatarUrl(publicUrl);
+      
+      toast({
+        title: "Sucesso",
+        description: "Foto de perfil atualizada com sucesso!",
+      });
+    } catch (error) {
+      console.error('Erro ao fazer upload do avatar:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível fazer upload da imagem. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -85,24 +160,44 @@ const Profile = () => {
         </div>
       </header>
 
-     
-       {/* Profile Header */}
+      {/* Profile Header */}
       <div className="p-6">
         <Card className="card-experience p-6">
           <div className="flex items-center gap-4">
             <div className="relative">
               <Avatar className="w-20 h-20">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xl">
-                    {user?.email ? getUserInitials(user.email) : <User size={32} />}
-                  </AvatarFallback>
-                </Avatar>
-                <button className="absolute -bottom-1 -right-1 p-2 bg-primary rounded-full text-white shadow-lg">
+                {avatarUrl ? (
+                  <AvatarImage src={avatarUrl} alt="Avatar" />
+                ) : null}
+                <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+                  {user?.email ? getUserInitials(user.email) : <User size={32} />}
+                </AvatarFallback>
+              </Avatar>
+              
+              <label htmlFor="avatar-upload" className="absolute -bottom-1 -right-1 p-2 bg-primary rounded-full text-white shadow-lg cursor-pointer hover:bg-primary/90">
                 <Camera className="w-4 h-4" />
-              </button>
+                <input
+                  id="avatar-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      handleAvatarUpload(e.target.files[0]);
+                    }
+                  }}
+                  disabled={isUploading}
+                />
+              </label>
+              {isUploading && (
+                <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                </div>
+              )}
             </div>
- 
-     <div className="flex-1">
-              <h2 className="text-2xl font-bold text-foreground">  {user?.user_metadata?.nome || "Usuário"}</h2>
+
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-foreground">{user?.user_metadata?.nome || "Usuário"}</h2>
               <p className="text-muted-foreground">{user?.email}</p>
               <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                 <Calendar className="text-emerald-600" size={20} />
@@ -122,12 +217,7 @@ const Profile = () => {
         </Card>
       </div>
 
-
-             
-
       {/* Profile Options */}
-      
-           
       <div className="px-6 space-y-3">
         {profileOptions.map((option, index) => (
           <Card 
@@ -153,10 +243,8 @@ const Profile = () => {
             </CardContent>
           </Card>
         ))}
-           
-          </div>
-        </div>
-     
+      </div>
+    </div>
   );
 };
 
