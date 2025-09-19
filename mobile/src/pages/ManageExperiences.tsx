@@ -25,14 +25,13 @@ interface Experience {
   img: string | null;
   incluso: string | null;
   tipo: number | null;
-  duração: string | null;
+  duracao: string | null;
   quantas_p: number | null;
-  data_experiencia?: string | null; // Tornar opcional com ?
+  data_experiencia?: string | null;
   status: 'analise' | 'disponivel';
-  created_at: string; // adicione created_at pois você usa para ordenar
-  id_dono: string | null; // adicione id_dono pois você usa
+  created_at: string;
+  id_dono: string | null;
 }
-
 
 const ManageExperiences = () => {
   const { user } = useAuth();
@@ -49,7 +48,7 @@ const ManageExperiences = () => {
     img: '',
     incluso: '',
     tipo: '1',
-    duração: '',
+    duracao: '',
     quantas_p: '',
     data_experiencia: null as Date | null
   });
@@ -62,7 +61,6 @@ const ManageExperiences = () => {
     if (!user) return;
     
     try {
-      // Buscar experiências em análise
       const { data: analiseData, error: analiseError } = await supabase
         .from('experiencias_analise')
         .select('*')
@@ -70,7 +68,6 @@ const ManageExperiences = () => {
 
       if (analiseError) throw analiseError;
 
-      // Buscar experiências disponíveis
       const { data: disponivelData, error: disponivelError } = await supabase
         .from('experiencias_dis')
         .select('*')
@@ -78,7 +75,6 @@ const ManageExperiences = () => {
 
       if (disponivelError) throw disponivelError;
 
-      // Combinar os dados com status
       const experienciasAnalise = (analiseData || []).map(exp => ({
         ...exp,
         status: 'analise' as const
@@ -106,63 +102,71 @@ const ManageExperiences = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
+  e.preventDefault();
+  if (!user) return;
 
-    try {
-      const experienceData = {
-        titulo: formData.titulo,
-        descricao: formData.descricao,
-        local: formData.local,
-        preco: parseFloat(formData.preco) || 0,
-        img: formData.img,
-        incluso: formData.incluso,
-        tipo: parseInt(formData.tipo) || 1,
-        duração: formData.duração ? new Date(formData.duração).toISOString() : null,
-        quantas_p: parseFloat(formData.quantas_p) || 1,
-        data_experiencia: formData.data_experiencia ? formData.data_experiencia.toISOString().split('T')[0] : null,
-        id_dono: user.id
-      };
+  try {
+    const experienceData = {
+      titulo: formData.titulo,
+      descricao: formData.descricao,
+      local: formData.local,
+      preco: parseFloat(formData.preco) || 0,
+      img: formData.img,
+      incluso: formData.incluso,
+      tipo: parseInt(formData.tipo) || 1,
+      duracao: formData.duracao ,
+      quantas_p: parseInt(formData.quantas_p) || 1,
+      data_experiencia: formData.data_experiencia ? format(formData.data_experiencia, 'yyyy-MM-dd') : null,
+      id_dono: user.id
+    };
 
-      if (editingExperience) {
-        const tableName = editingExperience.status === 'disponivel' ? 'experiencias_dis' : 'experiencias_analise';
-        
-        const { error } = await supabase
-          .from(tableName)
-          .update(experienceData)
-          .eq('id', editingExperience.id);
+    if (editingExperience) {
+      // Se está editando, primeiro insere na tabela de análise
+      const { error: insertError } = await supabase
+        .from('experiencias_analise')
+        .insert([experienceData]);
 
-        if (error) throw error;
-        
-        toast({
-          title: "Sucesso",
-          description: "Experiência atualizada com sucesso!",
-        });
-      } else {
-        const { error } = await supabase
-          .from('experiencias_analise')
-          .insert([experienceData]);
+      if (insertError) throw insertError;
 
-        if (error) throw error;
-        
-        toast({
-          title: "Sucesso",
-          description: "Experiência criada com sucesso!",
-        });
-      }
+      // Depois deleta da tabela atual (seja disponível ou análise)
+      const currentTable = editingExperience.status === 'disponivel' ? 'experiencias_dis' : 'experiencias_analise';
+      
+      const { error: deleteError } = await supabase
+        .from(currentTable)
+        .delete()
+        .eq('id', editingExperience.id);
 
-      resetForm();
-      fetchExperiences();
-    } catch (error) {
-      console.error('Erro ao salvar experiência:', error);
+      if (deleteError) throw deleteError;
+      
       toast({
-        title: "Erro",
-        description: "Não foi possível salvar a experiência.",
-        variant: "destructive",
+        title: "Sucesso",
+        description: "Experiência atualizada e enviada para análise!",
+      });
+    } else {
+      // Se é nova, insere na análise
+      const { error } = await supabase
+        .from('experiencias_analise')
+        .insert([experienceData]);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Sucesso",
+        description: "Experiência criada com sucesso!",
       });
     }
-  };
 
+    resetForm();
+    fetchExperiences();
+  } catch (error) {
+    console.error('Erro ao salvar experiência:', error);
+    toast({
+      title: "Erro",
+      description: "Não foi possível salvar a experiência.",
+      variant: "destructive",
+    });
+  }
+};
   const handleDelete = async (id: number) => {
     if (!confirm('Tem certeza que deseja excluir esta experiência?')) return;
 
@@ -205,7 +209,7 @@ const ManageExperiences = () => {
       img: experience.img || '',
       incluso: experience.incluso || '',
       tipo: experience.tipo?.toString() || '1',
-      duração: experience.duração || '',
+      duracao: experience.duracao || '',
       quantas_p: experience.quantas_p?.toString() || '',
       data_experiencia: experience.data_experiencia ? new Date(experience.data_experiencia) : null
     });
@@ -221,7 +225,7 @@ const ManageExperiences = () => {
       img: '',
       incluso: '',
       tipo: '1',
-      duração: '',
+      duracao: '',
       quantas_p: '',
       data_experiencia: null
     });
@@ -299,6 +303,16 @@ const ManageExperiences = () => {
                       step="0.01"
                       value={formData.preco}
                       onChange={(e) => setFormData({...formData, preco: e.target.value})}
+                    />
+                  </div>
+                 
+                  <div>
+                    <Label htmlFor="duracao">Duracao</Label>
+                    <Input
+                      id="duracao"
+                   
+                      value={formData.duracao}
+                      onChange={(e) => setFormData({...formData, duracao: e.target.value})}
                     />
                   </div>
                   <div>

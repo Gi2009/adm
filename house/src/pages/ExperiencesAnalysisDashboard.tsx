@@ -82,51 +82,63 @@ const ExperiencesAnalysisDashboard = () => {
   };
 
   const approveExperience = async (experience: any) => {
-    try {
-      // Insert into experiencias_dis
-      const { error: insertError } = await supabase
-        .from("experiencias_dis")
-        .insert({
-          titulo: experience.titulo,
-          descricao: experience.descricao,
-          local: experience.local,
-          preco: experience.preco,
-          tipo: experience.tipo,
-          quantas_p: experience.quantas_p,
-          duração: experience.duração,
-          incluso: experience.incluso,
-          img: experience.img,
-          id_dono: experience.id_dono,
-          data_experiencia: experience.data_experiencia,
-        });
+  try {
+    // Preparar os dados garantindo que todos os campos estejam corretos
+    const experienceData = {
+      titulo: experience.titulo || '',
+      descricao: experience.descricao || '',
+      local: experience.local || '',
+      preco: experience.preco || 0,
+      tipo: experience.tipo || 1,
+      quantas_p: experience.quantas_p || 1,
+      duracao: experience.duracao || null,
+      incluso: experience.incluso || '',
+      img: experience.img || '',
+      id_dono: experience.id_dono,
+      data_experiencia: experience.data_experiencia || null,
+      created_at: new Date().toISOString(), // Adicionar timestamp atual
+     // updated_at: new Date().toISOString()  // Adicionar timestamp de atualização
+    };
 
-      if (insertError) throw insertError;
+    console.log("Dados sendo enviados:", experienceData);
 
-      // Delete from experiencias_analise
-      const { error: deleteError } = await supabase
-        .from("experiencias_analise" as any)
-        .delete()
-        .eq("id", experience.id);
+    // Insert into experiencias_dis
+    const { error: insertError } = await supabase
+      .from("experiencias_dis")
+      .insert([experienceData]);
 
-      if (deleteError) throw deleteError;
-
-      // Remove from local state immediately
-      setExperiences(prev => prev.filter(exp => exp.id !== experience.id));
-
-      toast({
-        title: "Experiência aprovada!",
-        description: "A experiência foi aprovada e está disponível no sistema.",
-      });
-    } catch (error) {
-      console.error("Erro ao aprovar experiência:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível aprovar a experiência.",
-        variant: "destructive",
-      });
+    if (insertError) {
+      console.error("Erro ao inserir:", insertError);
+      throw insertError;
     }
-  };
 
+    // Delete from experiencias_analise
+    const { error: deleteError } = await supabase
+      .from("experiencias_analise")
+      .delete()
+      .eq("id", experience.id);
+
+    if (deleteError) {
+      console.error("Erro ao deletar:", deleteError);
+      throw deleteError;
+    }
+
+    // Remove from local state immediately
+    setExperiences(prev => prev.filter(exp => exp.id !== experience.id));
+
+    toast({
+      title: "Experiência aprovada!",
+      description: "A experiência foi aprovada e está disponível no sistema.",
+    });
+  } catch (error) {
+    console.error("Erro ao aprovar experiência:", error);
+    toast({
+      title: "Erro",
+      description: "Não foi possível aprovar a experiência.",
+      variant: "destructive",
+    });
+  }
+};
 
 
   

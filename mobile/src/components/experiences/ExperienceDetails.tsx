@@ -28,7 +28,7 @@ interface Experience {
   descricao: string;
   incluso: string;
   quantas_p: number;
-  duração: string;
+  duracao: string;
   tipo: number;
   data_experiencia?: string;
 }
@@ -245,6 +245,11 @@ const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = fa
               <span className="text-sm text-muted-foreground">Vagas disponíveis:</span>
               <span className="font-medium">{experience.quantas_p}</span>
             </div>
+
+           <div>
+            <span className="text-sm text-muted-foreground">Duração:</span>
+              <span className="font-medium">{experience.duracao}</span>
+          </div>
 
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-primary" />

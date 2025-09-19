@@ -96,7 +96,7 @@ export type Database = {
         Row: {
           created_at: string
           descricao: string | null
-          duração: string | null
+          duracao: string | null
           id: number
           id_dono: string | null
           img: string | null
@@ -110,7 +110,7 @@ export type Database = {
         Insert: {
           created_at?: string
           descricao?: string | null
-          duração?: string | null
+          duracao?: string | null
           id?: number
           id_dono?: string | null
           img?: string | null
@@ -124,7 +124,7 @@ export type Database = {
         Update: {
           created_at?: string
           descricao?: string | null
-          duração?: string | null
+          duracao?: string | null
           id?: number
           id_dono?: string | null
           img?: string | null
@@ -141,7 +141,7 @@ export type Database = {
         Row: {
           created_at: string
           descricao: string | null
-          duração: string | null
+          duracao: string | null
           id: number
           id_dono: string | null
           img: string | null
@@ -155,7 +155,7 @@ export type Database = {
         Insert: {
           created_at?: string
           descricao?: string | null
-          duração?: string | null
+          duracao?: string | null
           id?: number
           id_dono?: string | null
           img?: string | null
@@ -169,7 +169,7 @@ export type Database = {
         Update: {
           created_at?: string
           descricao?: string | null
-          duração?: string | null
+          duracao?: string | null
           id?: number
           id_dono?: string | null
           img?: string | null
