@@ -12,6 +12,7 @@ import type { Database } from '@/integrations/supabase/types';
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 declare global {
   interface Window {
@@ -30,7 +31,7 @@ interface Experience {
   quantas_p: number;
   duracao: string;
   tipo: number;
-  data_experiencia?: string;
+  datas_disponiveis: string[]; // Array de datas disponíveis
 }
 
 interface ExperienceDetailsProps {
@@ -42,13 +43,20 @@ interface ExperienceDetailsProps {
 
 const formatDate = (dateString: string) => {
   if (!dateString) return '';
-  return new Date(dateString).toLocaleDateString('pt-BR');
+  const date = new Date(dateString);
+  return date.toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 };
 
 const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = false }: ExperienceDetailsProps) => {
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [ticketQuantity, setTicketQuantity] = useState(1);
+  const [selectedDate, setSelectedDate] = useState<string>('');
   const { user } = useAuth();
 
   console.log('Usuário atual:', user);
@@ -62,7 +70,7 @@ const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = fa
       return;
     }
 
-    if (user && experience) {
+    if (user && experience && selectedDate) {
       try {
         const totalAmount = experience.preco * ticketQuantity;
         
@@ -71,12 +79,13 @@ const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = fa
           .insert({
             user_id: user.id,
             experiencia_id: experience.id,
+            data_experiencia: selectedDate, // Salvar a data selecionada
             data_compra: new Date().toISOString(),
             status: 'confirmado',
             valor: totalAmount,
             quantidade_ingressos: ticketQuantity,
             detalhes_pagamento: details
-          } as Database['public']['Tables']['compras_experiencias']['Insert']);
+          });
 
         if (error) {
           console.error('Erro ao salvar compra:', error);
@@ -87,7 +96,7 @@ const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = fa
         console.error('Erro ao salvar compra:', error);
       }
     }
-  }, [user, experience, ticketQuantity]);
+  }, [user, experience, ticketQuantity, selectedDate]);
 
   const increaseQuantity = () => {
     if (experience && ticketQuantity < experience.quantas_p) {
@@ -114,6 +123,7 @@ const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = fa
     if (!open) {
       setPaymentSuccess(false);
       setTicketQuantity(1);
+      setSelectedDate('');
       return;
     }
 
@@ -246,18 +256,53 @@ const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = fa
               <span className="font-medium">{experience.quantas_p}</span>
             </div>
 
-           <div>
-            <span className="text-sm text-muted-foreground">Duração:</span>
+            <div>
+              <span className="text-sm text-muted-foreground">Duração:</span>
               <span className="font-medium">{experience.duracao}</span>
-          </div>
+            </div>
 
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-primary" />
-              <span className="text-sm text-muted-foreground">Data:</span>
-              <span className="font-medium">{formatDate(experience.data_experiencia || '')}</span>
+              <span className="text-sm text-muted-foreground">Datas disponíveis:</span>
             </div>
           </div>
 
+          {/* Seletor de data */}
+           {experience.datas_disponiveis && experience.datas_disponiveis.length > 0 && (
+          <div className="bg-muted p-3 rounded-lg">
+            <h4 className="font-semibold mb-2 text-foreground">Datas disponíveis:</h4>
+            <div className="grid grid-cols-2 gap-2">
+              {experience.datas_disponiveis
+                .sort()
+                .map((date, index) => (
+                  <div key={index} className="text-sm text-muted-foreground bg-background p-2 rounded">
+                    {formatDate(date)}
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+          {/* Mostrar data selecionada na compra bem-sucedida */}
+           {!isPurchaseView && !paymentSuccess && (
+          <div>
+            <Label htmlFor="data-experiencia">Selecione a data desejada *</Label>
+            <select
+              id="data-experiencia"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="w-full p-2 border rounded-md mt-1"
+              required
+            >
+              <option value="">Selecione uma data</option>
+              {experience.datas_disponiveis?.map((date, index) => (
+                <option key={index} value={date}>
+                  {formatDate(date)}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
           <div>
             <h4 className="font-semibold mb-2 text-foreground">Descrição</h4>
             <p className="text-muted-foreground leading-relaxed">{experience.descricao}</p>
@@ -287,6 +332,11 @@ const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = fa
                   {ticketQuantity} {ticketQuantity === 1 ? 'ingresso' : 'ingressos'} comprado(s) com sucesso. 
                   Você receberá um e-mail com os detalhes.
                 </p>
+                {selectedDate && (
+                  <p className="text-green-600 mt-1">
+                    Data selecionada: {formatDate(selectedDate)}
+                  </p>
+                )}
               </div>
             ) : isPurchaseView ? (
               // Visualização de compra - sem opção de comprar
@@ -304,6 +354,15 @@ const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = fa
               <>
                 <h4 className="font-semibold mb-4 text-foreground">Reservar esta experiência</h4>
                 
+                {/* Verificar se uma data foi selecionada */}
+                {!selectedDate && (
+                  <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200 mb-4">
+                    <p className="text-yellow-700 text-sm">
+                      Por favor, selecione uma data para continuar com a compra.
+                    </p>
+                  </div>
+                )}
+
                 {/* Seletor de quantidade */}
                 <div className="bg-muted p-4 rounded-lg mb-4">
                   <div className="flex items-center justify-between mb-3">
@@ -358,11 +417,13 @@ const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = fa
                   <p className="text-xs text-muted-foreground mt-3">Pagamento seguro via PayPal</p>
                 </div>
                 
-                {paypalLoaded ? (
+                {paypalLoaded && selectedDate ? (
                   <div id="paypal-button-container" className="paypal-buttons"></div>
                 ) : (
                   <div className="flex justify-center items-center h-16 bg-muted rounded-lg">
-                    <p className="text-muted-foreground">Carregando opções de pagamento...</p>
+                    <p className="text-muted-foreground">
+                      {!selectedDate ? 'Selecione uma data para ver as opções de pagamento' : 'Carregando opções de pagamento...'}
+                    </p>
                   </div>
                 )}
               </>

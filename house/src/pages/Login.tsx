@@ -35,7 +35,7 @@ const Login = () => {
         .single();
 
       if (profile?.type === '3') {
-        navigate('/candidates-dashboard');
+        navigate('/Hause');
       } else {
         navigate('/');
       }

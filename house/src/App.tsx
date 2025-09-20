@@ -7,10 +7,12 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProviderRegistration from "./pages/ProviderRegistration";
 import Login from "./pages/Login";
-import CandidatesDashboard from "./pages/CandidatesDashboard";
-import ExperiencesAnalysisDashboard from "./pages/ExperiencesAnalysisDashboard";
-import CandidateRegistration from "./pages/CandidatesRegistration";
-import AdminRegistration from "./pages/AdminRegistration";
+import CandidatesDashboard from "./components/CandidatesDashboard";
+import ExperiencesAnalysisDashboard from "./components/ExperiencesAnalysisDashboard";
+import CandidateRegistration from "./components/CandidatesRegistration";
+import AdminRegistration from "./components/AdminRegistration";
+import { Home } from "lucide-react";
+import Hause from "./pages/Hause";
 
 const queryClient = new QueryClient();
 
@@ -24,8 +26,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/provider-registration" element={<ProviderRegistration />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/candidates-dashboard" element={<CandidatesDashboard />} />
-          <Route path="/experiences-analysis" element={<ExperiencesAnalysisDashboard />} />
+          <Route path="/hause/*" element={<Hause />} />
+          
            <Route path="/candidate-registration" element={<CandidateRegistration />} />
           <Route path="/admin-registration" element={<AdminRegistration />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

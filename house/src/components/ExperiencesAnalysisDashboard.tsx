@@ -15,8 +15,6 @@ const ExperiencesAnalysisDashboard = () => {
   const { toast } = useToast();
 
 
-
-
   useEffect(() => {
     checkUserAccess();
   }, []);
@@ -36,15 +34,7 @@ const ExperiencesAnalysisDashboard = () => {
         .eq("user_id", session.user.id)
         .single();
 
-      if (!profile || profile.type !== '3') {
-        toast({
-          title: "Acesso negado",
-          description: "Você não tem permissão para acessar esta página.",
-          variant: "destructive",
-        });
-        navigate("/");
-        return;
-      }
+      
 
       setUserProfile(profile);
       await loadExperiences();
@@ -82,63 +72,62 @@ const ExperiencesAnalysisDashboard = () => {
   };
 
   const approveExperience = async (experience: any) => {
-  try {
-    // Preparar os dados garantindo que todos os campos estejam corretos
-    const experienceData = {
-      titulo: experience.titulo || '',
-      descricao: experience.descricao || '',
-      local: experience.local || '',
-      preco: experience.preco || 0,
-      tipo: experience.tipo || 1,
-      quantas_p: experience.quantas_p || 1,
-      duracao: experience.duracao || null,
-      incluso: experience.incluso || '',
-      img: experience.img || '',
-      id_dono: experience.id_dono,
-      data_experiencia: experience.data_experiencia || null,
-      created_at: new Date().toISOString(), // Adicionar timestamp atual
-     // updated_at: new Date().toISOString()  // Adicionar timestamp de atualização
-    };
+    try {
+      // Preparar os dados com o novo campo datas_disponiveis
+      const experienceData = {
+        titulo: experience.titulo || '',
+        descricao: experience.descricao || '',
+        local: experience.local || '',
+        preco: experience.preco || 0,
+        tipo: experience.tipo || 1,
+        quantas_p: experience.quantas_p || 1,
+        duracao: experience.duracao || null,
+        incluso: experience.incluso || '',
+        img: experience.img || '',
+        id_dono: experience.id_dono,
+        datas_disponiveis: experience.datas_disponiveis || [], // Usar datas_disponiveis em vez de data_experiencia
+        created_at: new Date().toISOString(),
+      };
 
-    console.log("Dados sendo enviados:", experienceData);
+      console.log("Dados sendo enviados:", experienceData);
 
-    // Insert into experiencias_dis
-    const { error: insertError } = await supabase
-      .from("experiencias_dis")
-      .insert([experienceData]);
+      // Insert into experiencias_dis
+      const { error: insertError } = await supabase
+        .from("experiencias_dis")
+        .insert([experienceData]);
 
-    if (insertError) {
-      console.error("Erro ao inserir:", insertError);
-      throw insertError;
+      if (insertError) {
+        console.error("Erro ao inserir:", insertError);
+        throw insertError;
+      }
+
+      // Delete from experiencias_analise
+      const { error: deleteError } = await supabase
+        .from("experiencias_analise")
+        .delete()
+        .eq("id", experience.id);
+
+      if (deleteError) {
+        console.error("Erro ao deletar:", deleteError);
+        throw deleteError;
+      }
+
+      // Remove from local state immediately
+      setExperiences(prev => prev.filter(exp => exp.id !== experience.id));
+
+      toast({
+        title: "Experiência aprovada!",
+        description: "A experiência foi aprovada e está disponível no sistema.",
+      });
+    } catch (error) {
+      console.error("Erro ao aprovar experiência:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível aprovar a experiência.",
+        variant: "destructive",
+      });
     }
-
-    // Delete from experiencias_analise
-    const { error: deleteError } = await supabase
-      .from("experiencias_analise")
-      .delete()
-      .eq("id", experience.id);
-
-    if (deleteError) {
-      console.error("Erro ao deletar:", deleteError);
-      throw deleteError;
-    }
-
-    // Remove from local state immediately
-    setExperiences(prev => prev.filter(exp => exp.id !== experience.id));
-
-    toast({
-      title: "Experiência aprovada!",
-      description: "A experiência foi aprovada e está disponível no sistema.",
-    });
-  } catch (error) {
-    console.error("Erro ao aprovar experiência:", error);
-    toast({
-      title: "Erro",
-      description: "Não foi possível aprovar a experiência.",
-      variant: "destructive",
-    });
-  }
-};
+  };
 
 
   
@@ -260,12 +249,14 @@ const ExperiencesAnalysisDashboard = () => {
                       <Users className="h-4 w-4 text-muted-foreground" />
                       <span>{experience.quantas_p} pessoas</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="truncate">
-                        {experience.data_experiencia }
-                      </span>
-                    </div>
+                     <div className="flex items-center gap-2">
+    <Clock className="h-4 w-4 text-muted-foreground" />
+    <span className="truncate">
+      {experience.datas_disponiveis?.length > 0 
+        ? `${experience.datas_disponiveis.length} datas disponíveis`
+        : 'Sem datas definidas'}
+    </span>
+  </div>
                   </div>
 
                   {experience.incluso && (

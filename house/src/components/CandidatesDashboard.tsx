@@ -26,43 +26,12 @@ const CandidatesDashboard = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<number | null>(null);
-  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+
   const { toast } = useToast();
 
-  useEffect(() => {
-    checkAuthorization();
-  }, []);
-
-  const checkAuthorization = async () => {
-    try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError || !user) {
-        setIsAuthorized(false);
-        setLoading(false);
-        return;
-      }
-
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('type')
-        .eq('user_id', user.id)
-        .single();
-
-      if (profileError || !profile || profile.type !== '3') {
-        setIsAuthorized(false);
-        setLoading(false);
-        return;
-      }
-
-      setIsAuthorized(true);
-      fetchCandidates();
-    } catch (error) {
-      console.error('Authorization error:', error);
-      setIsAuthorized(false);
-      setLoading(false);
-    }
-  };
+useEffect(() => {
+    fetchCandidates();
+  }, []); 
 
   const fetchCandidates = async () => {
     try {
@@ -239,21 +208,7 @@ const CandidatesDashboard = () => {
     );
   }
 
-  if (!isAuthorized) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-destructive">Acesso Negado</CardTitle>
-            <CardDescription>
-              Você não tem permissão para acessar esta página. Apenas usuários do tipo 3 podem visualizar os candidatos.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    );
-  }
-
+  
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">

@@ -28,8 +28,8 @@ export type Database = {
           municipio: string | null
           nome: string | null
           telefone: string | null
-           url_foto_documento: string| null
-           url_comprovante_endereco: string| null
+          url_foto_documento: string | null
+          url_comprovante_endereco: string | null
         }
         Insert: {
           associacao?: string | null
@@ -44,8 +44,8 @@ export type Database = {
           municipio?: string | null
           nome?: string | null
           telefone?: string | null
-           url_foto_documento: string| null
-           url_comprovante_endereco: string| null
+          url_foto_documento?: string | null
+          url_comprovante_endereco?: string | null
         }
         Update: {
           associacao?: string | null
@@ -60,14 +60,15 @@ export type Database = {
           municipio?: string | null
           nome?: string | null
           telefone?: string | null
-           url_foto_documento: string| null
-           url_comprovante_endereco: string| null
+          url_foto_documento?: string | null
+          url_comprovante_endereco?: string | null
         }
         Relationships: []
       }
       experiencias_dis: {
         Row: {
           created_at: string
+          datas_disponiveis: string[] | null
           descricao: string | null
           duracao: string | null
           id: number
@@ -82,6 +83,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          datas_disponiveis?: string[] | null
           descricao?: string | null
           duracao?: string | null
           id?: number
@@ -96,6 +98,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          datas_disponiveis?: string[] | null
           descricao?: string | null
           duracao?: string | null
           id?: number
@@ -110,10 +113,10 @@ export type Database = {
         }
         Relationships: []
       }
-         experiencias_analise: {
+      experiencias_analise: {
         Row: {
           created_at: string
-          data_experiencia: string | null
+          datas_disponiveis: string[] | null
           descricao: string | null
           duracao: string | null
           id: number
@@ -128,7 +131,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          data_experiencia?: string | null
+          datas_disponiveis?: string[] | null
           descricao?: string | null
           duracao?: string | null
           id?: number
@@ -143,7 +146,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          data_experiencia?: string | null
+          datas_disponiveis?: string[] | null
           descricao?: string | null
           duracao?: string | null
           id?: number
@@ -158,42 +161,43 @@ export type Database = {
         }
         Relationships: []
       }
-
-   
       compras_experiencias: {
         Row: {
-          id: number;
-          user_id: string;
-          experiencia_id: number;
-          data_compra: string;
-          status: string;
-          valor: number;
-          detalhes_pagamento: Json | null;
-          created_at: string;
-          quantidade_ingressos;
-        };
+          id: number
+          user_id: string
+          experiencia_id: number
+          data_compra: string
+          status: string
+          valor: number
+          detalhes_pagamento: Json | null
+          created_at: string
+          quantidade_ingressos: number
+          data_experiencia: string | null
+        }
         Insert: {
-          id?: number;
-          user_id: string;
-          experiencia_id: number;
-          data_compra?: string;
-          status?: string;
-          valor: number;
-          detalhes_pagamento?: Json | null;
-          created_at?: string;
-          quantidade_ingressos;
-        };
+          id?: number
+          user_id: string
+          experiencia_id: number
+          data_compra?: string
+          status?: string
+          valor: number
+          detalhes_pagamento?: Json | null
+          created_at?: string
+          quantidade_ingressos: number
+          data_experiencia?: string | null
+        }
         Update: {
-          id?: number;
-          user_id?: string;
-          experiencia_id?: number;
-          data_compra?: string;
-          status?: string;
-          valor?: number;
-          detalhes_pagamento?: Json | null;
-          created_at?: string;
-          quantidade_ingressos;
-        };
+          id?: number
+          user_id?: string
+          experiencia_id?: number
+          data_compra?: string
+          status?: string
+          valor?: number
+          detalhes_pagamento?: Json | null
+          created_at?: string
+          quantidade_ingressos?: number
+          data_experiencia?: string | null
+        }
         Relationships: [
           {
             foreignKeyName: "compras_experiencias_experiencia_id_fkey"
@@ -207,10 +211,8 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           }
-        ];
+        ]
       }
-
- 
       favoritos: {
         Row: {
           created_at: string
@@ -251,7 +253,7 @@ export type Database = {
           telefone: string
           type: string
           updated_at: string
-          user_id: string,
+          user_id: string
           foto_usu: string
         }
         Insert: {
@@ -264,8 +266,8 @@ export type Database = {
           telefone: string
           type: string
           updated_at?: string
-          user_id: string,
-          foto_usu: string
+          user_id: string
+          foto_usu?: string
         }
         Update: {
           associação?: string | null
@@ -277,36 +279,35 @@ export type Database = {
           telefone?: string
           type?: string
           updated_at?: string
-          user_id?: string,
-          foto_usu: string
+          user_id?: string
+          foto_usu?: string
         }
         Relationships: []
       }
-
       dados_bancarios: {
         Row: {
-        user_id?: string
-        email_paypal?: string
-        nome_titular?: string
-        cpf_titular?: string
-        created_at?: string
-        updated_at ?: string
+          user_id: string
+          email_paypal: string | null
+          nome_titular: string | null
+          cpf_titular: string | null
+          created_at: string
+          updated_at: string | null
         }
         Insert: {
-           user_id?: string
-        email_paypal?: string
-        nome_titular?: string
-        cpf_titular?: string
-        created_at?: string
-        updated_at ?: string
+          user_id: string
+          email_paypal?: string | null
+          nome_titular?: string | null
+          cpf_titular?: string | null
+          created_at?: string
+          updated_at?: string | null
         }
         Update: {
           user_id?: string
-        email_paypal?: string
-        nome_titular?: string
-        cpf_titular?: string
-        created_at?: string
-        updated_at ?: string
+          email_paypal?: string | null
+          nome_titular?: string | null
+          cpf_titular?: string | null
+          created_at?: string
+          updated_at?: string | null
         }
         Relationships: []
       }

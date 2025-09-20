@@ -93,95 +93,101 @@ export type Database = {
         Relationships: []
       }
       experiencias_analise: {
-        Row: {
-          created_at: string
-          descricao: string | null
-          duracao: string | null
-          id: number
-          id_dono: string | null
-          img: string | null
-          incluso: string | null
-          local: string
-          preco: number | null
-          quantas_p: number | null
-          tipo: number | null
-          titulo: string | null
-        }
-        Insert: {
-          created_at?: string
-          descricao?: string | null
-          duracao?: string | null
-          id?: number
-          id_dono?: string | null
-          img?: string | null
-          incluso?: string | null
-          local?: string
-          preco?: number | null
-          quantas_p?: number | null
-          tipo?: number | null
-          titulo?: string | null
-        }
-        Update: {
-          created_at?: string
-          descricao?: string | null
-          duracao?: string | null
-          id?: number
-          id_dono?: string | null
-          img?: string | null
-          incluso?: string | null
-          local?: string
-          preco?: number | null
-          quantas_p?: number | null
-          tipo?: number | null
-          titulo?: string | null
-        }
-        Relationships: []
-      }
+  Row: {
+    created_at: string
+    datas_disponiveis: string[] | null // Adicionar este campo
+    descricao: string | null
+    duracao: string | null
+    id: number
+    id_dono: string | null
+    img: string | null
+    incluso: string | null
+    local: string
+    preco: number | null
+    quantas_p: number | null
+    tipo: number | null
+    titulo: string | null
+  }
+  Insert: {
+    created_at?: string
+    datas_disponiveis?: string[] | null // Adicionar este campo
+    descricao?: string | null
+    duracao?: string | null
+    id?: number
+    id_dono?: string | null
+    img?: string | null
+    incluso?: string | null
+    local?: string
+    preco?: number | null
+    quantas_p?: number | null
+    tipo?: number | null
+    titulo?: string | null
+  }
+  Update: {
+    created_at?: string
+    datas_disponiveis?: string[] | null // Adicionar este campo
+    descricao?: string | null
+    duracao?: string | null
+    id?: number
+    id_dono?: string | null
+    img?: string | null
+    incluso?: string | null
+    local?: string
+    preco?: number | null
+    quantas_p?: number | null
+    tipo?: number | null
+    titulo?: string | null
+  }
+  Relationships: []
+}
       experiencias_dis: {
-        Row: {
-          created_at: string
-          descricao: string | null
-          duracao: string | null
-          id: number
-          id_dono: string | null
-          img: string | null
-          incluso: string | null
-          local: string
-          preco: number | null
-          quantas_p: number | null
-          tipo: number | null
-          titulo: string | null
-        }
-        Insert: {
-          created_at?: string
-          descricao?: string | null
-          duracao?: string | null
-          id?: number
-          id_dono?: string | null
-          img?: string | null
-          incluso?: string | null
-          local?: string
-          preco?: number | null
-          quantas_p?: number | null
-          tipo?: number | null
-          titulo?: string | null
-        }
-        Update: {
-          created_at?: string
-          descricao?: string | null
-          duracao?: string | null
-          id?: number
-          id_dono?: string | null
-          img?: string | null
-          incluso?: string | null
-          local?: string
-          preco?: number | null
-          quantas_p?: number | null
-          tipo?: number | null
-          titulo?: string | null
-        }
-        Relationships: []
-      }
+  Row: {
+    created_at: string
+    datas_disponiveis: string[] | null // Adicionar este campo
+    descricao: string | null
+    duracao: string | null
+    id: number
+    id_dono: string | null
+    img: string | null
+    incluso: string | null
+    local: string
+    preco: number | null
+    quantas_p: number | null
+    tipo: number | null
+    titulo: string | null
+  }
+  Insert: {
+    created_at?: string
+    datas_disponiveis?: string[] | null // Adicionar este campo
+    descricao?: string | null
+    duracao?: string | null
+    id?: number
+    id_dono?: string | null
+    img?: string | null
+    incluso?: string | null
+    local?: string
+    preco?: number | null
+    quantas_p?: number | null
+    tipo?: number | null
+    titulo?: string | null
+  }
+  Update: {
+    created_at?: string
+    datas_disponiveis?: string[] | null // Adicionar este campo
+    descricao?: string | null
+    duracao?: string | null
+    id?: number
+    id_dono?: string | null
+    img?: string | null
+    incluso?: string | null
+    local?: string
+    preco?: number | null
+    quantas_p?: number | null
+    tipo?: number | null
+    titulo?: string | null
+  }
+  Relationships: []
+}
       favoritos: {
         Row: {
           created_at: string

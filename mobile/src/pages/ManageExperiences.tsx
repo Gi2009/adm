@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale"; // Adicionar este import
 import { cn } from "@/lib/utils";
 
 interface Experience {
@@ -27,7 +28,7 @@ interface Experience {
   tipo: number | null;
   duracao: string | null;
   quantas_p: number | null;
-  data_experiencia?: string | null;
+  datas_disponiveis: string[] | null;
   status: 'analise' | 'disponivel';
   created_at: string;
   id_dono: string | null;
@@ -40,6 +41,9 @@ const ManageExperiences = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingExperience, setEditingExperience] = useState<Experience | null>(null);
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+
+  // Corrigir o tipo do formData - remover datas_disponiveis daqui
   const [formData, setFormData] = useState({
     titulo: '',
     descricao: '',
@@ -50,8 +54,21 @@ const ManageExperiences = () => {
     tipo: '1',
     duracao: '',
     quantas_p: '',
-    data_experiencia: null as Date | null
   });
+
+  // Corrigir a função handleDateSelect
+  const handleDateSelect = (date: Date | undefined) => {
+    if (!date) return;
+    
+    const dateString = date.toISOString().split('T')[0];
+    const isSelected = selectedDates.some(d => d.toISOString().split('T')[0] === dateString);
+    
+    if (isSelected) {
+      setSelectedDates(selectedDates.filter(d => d.toISOString().split('T')[0] !== dateString));
+    } else {
+      setSelectedDates([...selectedDates, date]);
+    }
+  };
 
   useEffect(() => {
     fetchExperiences();
@@ -102,71 +119,69 @@ const ManageExperiences = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!user) return;
+    e.preventDefault();
+    if (!user) return;
 
-  try {
-    const experienceData = {
-      titulo: formData.titulo,
-      descricao: formData.descricao,
-      local: formData.local,
-      preco: parseFloat(formData.preco) || 0,
-      img: formData.img,
-      incluso: formData.incluso,
-      tipo: parseInt(formData.tipo) || 1,
-      duracao: formData.duracao ,
-      quantas_p: parseInt(formData.quantas_p) || 1,
-      data_experiencia: formData.data_experiencia ? format(formData.data_experiencia, 'yyyy-MM-dd') : null,
-      id_dono: user.id
-    };
+    try {
+      const experienceData = {
+        titulo: formData.titulo,
+        descricao: formData.descricao,
+        local: formData.local,
+        preco: parseFloat(formData.preco) || 0,
+        img: formData.img,
+        incluso: formData.incluso,
+        tipo: parseInt(formData.tipo) || 1,
+        duracao: formData.duracao,
+        quantas_p: parseInt(formData.quantas_p) || 1,
+        datas_disponiveis: selectedDates.map(date => date.toISOString().split('T')[0]),
+        id_dono: user.id
+      };
 
-    if (editingExperience) {
-      // Se está editando, primeiro insere na tabela de análise
-      const { error: insertError } = await supabase
-        .from('experiencias_analise')
-        .insert([experienceData]);
+      if (editingExperience) {
+        const { error: insertError } = await supabase
+          .from('experiencias_analise')
+          .insert([experienceData]);
 
-      if (insertError) throw insertError;
+        if (insertError) throw insertError;
 
-      // Depois deleta da tabela atual (seja disponível ou análise)
-      const currentTable = editingExperience.status === 'disponivel' ? 'experiencias_dis' : 'experiencias_analise';
-      
-      const { error: deleteError } = await supabase
-        .from(currentTable)
-        .delete()
-        .eq('id', editingExperience.id);
+        const currentTable = editingExperience.status === 'disponivel' ? 'experiencias_dis' : 'experiencias_analise';
+        
+        const { error: deleteError } = await supabase
+          .from(currentTable)
+          .delete()
+          .eq('id', editingExperience.id);
 
-      if (deleteError) throw deleteError;
-      
+        if (deleteError) throw deleteError;
+        
+        toast({
+          title: "Sucesso",
+          description: "Experiência atualizada e enviada para análise!",
+        });
+      } else {
+        const { error } = await supabase
+          .from('experiencias_analise')
+          .insert([experienceData]);
+
+        if (error) throw error;
+        
+        toast({
+          title: "Sucesso",
+          description: "Experiência criada com sucesso!",
+        });
+      }
+
+      resetForm();
+      fetchExperiences();
+    } catch (error) {
+      console.error('Erro ao salvar experiência:', error);
       toast({
-        title: "Sucesso",
-        description: "Experiência atualizada e enviada para análise!",
-      });
-    } else {
-      // Se é nova, insere na análise
-      const { error } = await supabase
-        .from('experiencias_analise')
-        .insert([experienceData]);
-
-      if (error) throw error;
-      
-      toast({
-        title: "Sucesso",
-        description: "Experiência criada com sucesso!",
+        title: "Erro",
+        description: "Não foi possível salvar a experiência.",
+        variant: "destructive",
       });
     }
+  };
 
-    resetForm();
-    fetchExperiences();
-  } catch (error) {
-    console.error('Erro ao salvar experiência:', error);
-    toast({
-      title: "Erro",
-      description: "Não foi possível salvar a experiência.",
-      variant: "destructive",
-    });
-  }
-};
   const handleDelete = async (id: number) => {
     if (!confirm('Tem certeza que deseja excluir esta experiência?')) return;
 
@@ -211,8 +226,14 @@ const ManageExperiences = () => {
       tipo: experience.tipo?.toString() || '1',
       duracao: experience.duracao || '',
       quantas_p: experience.quantas_p?.toString() || '',
-      data_experiencia: experience.data_experiencia ? new Date(experience.data_experiencia) : null
     });
+    
+    if (experience.datas_disponiveis) {
+      setSelectedDates(experience.datas_disponiveis.map(dateStr => new Date(dateStr)));
+    } else {
+      setSelectedDates([]);
+    }
+    
     setIsDialogOpen(true);
   };
 
@@ -227,8 +248,8 @@ const ManageExperiences = () => {
       tipo: '1',
       duracao: '',
       quantas_p: '',
-      data_experiencia: null
     });
+    setSelectedDates([]);
     setEditingExperience(null);
     setIsDialogOpen(false);
   };
@@ -251,7 +272,10 @@ const ManageExperiences = () => {
           <h1 className="text-2xl font-bold text-emerald-800">Gerenciar Experiências</h1>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => setEditingExperience(null)} className="bg-emerald-600 hover:bg-emerald-700">
+              <Button onClick={() => {
+                setEditingExperience(null);
+                setSelectedDates([]);
+              }} className="bg-emerald-600 hover:bg-emerald-700">
                 <Plus className="mr-2" size={16} />
                 Nova Experiência
               </Button>
@@ -307,10 +331,9 @@ const ManageExperiences = () => {
                   </div>
                  
                   <div>
-                    <Label htmlFor="duracao">Duracao</Label>
+                    <Label htmlFor="duracao">Duração</Label>
                     <Input
                       id="duracao"
-                   
                       value={formData.duracao}
                       onChange={(e) => setFormData({...formData, duracao: e.target.value})}
                     />
@@ -324,37 +347,52 @@ const ManageExperiences = () => {
                       onChange={(e) => setFormData({...formData, quantas_p: e.target.value})}
                     />
                   </div>
-                  <div>
-                    <Label>Data da Experiência</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !formData.data_experiencia && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {formData.data_experiencia ? (
-                            format(formData.data_experiencia, "dd/MM/yyyy")
-                          ) : (
-                            <span>Selecionar data</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={formData.data_experiencia || undefined}
-                          onSelect={(date) => setFormData({...formData, data_experiencia: date || null})}
-                          disabled={(date) => date < new Date()}
-                          initialFocus
-                          className="p-3 pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                </div>
+
+                <div>
+                  <Label>Datas Disponíveis *</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start text-left font-normal">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDates.length > 0 
+                          ? `${selectedDates.length} data(s) selecionada(s)` 
+                          : 'Selecionar datas'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={undefined}
+                        onSelect={handleDateSelect}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                        locale={ptBR}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  {selectedDates.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-sm text-muted-foreground mb-1">Datas selecionadas:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedDates
+                          .sort((a, b) => a.getTime() - b.getTime())
+                          .map((date, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {format(date, 'dd/MM/yyyy')}
+                              <button
+                                type="button"
+                                onClick={() => setSelectedDates(selectedDates.filter(d => d.getTime() !== date.getTime()))}
+                                className="ml-1 text-red-500 hover:text-red-700"
+                              >
+                                ×
+                              </button>
+                            </Badge>
+                          ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <ImageUpload
@@ -406,7 +444,7 @@ const ManageExperiences = () => {
                   <div className="aspect-video bg-muted">
                     <img
                       src={experience.img}
-                      alt={experience.titulo}
+                      alt={experience.titulo || 'Experiência'}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
@@ -419,7 +457,7 @@ const ManageExperiences = () => {
                     <CardTitle className="text-lg">{experience.titulo}</CardTitle>
                     <Badge 
                       variant={experience.status === 'disponivel' ? 'default' : 'secondary'}
-                      className={experience.status === 'disponivel' ? 'bg-ocean-primary text-white' : 'bg-ocean-muted text-ocean-dark'}
+                      className={experience.status === 'disponivel' ? 'bg-emerald-600 text-white' : 'bg-gray-400 text-white'}
                     >
                       {experience.status === 'disponivel' ? (
                         <>
@@ -450,6 +488,11 @@ const ManageExperiences = () => {
                     <p className="text-sm text-muted-foreground line-clamp-2">
                       {experience.descricao}
                     </p>
+                  )}
+                  {experience.datas_disponiveis && experience.datas_disponiveis.length > 0 && (
+                    <div className="text-sm text-muted-foreground">
+                      {experience.datas_disponiveis.length} data(s) disponível(is)
+                    </div>
                   )}
                   <div className="flex gap-2 pt-2">
                     <Button
