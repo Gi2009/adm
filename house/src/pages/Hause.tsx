@@ -27,6 +27,8 @@ import Dashboard from "@/components/Dashboard";
 import CandidatesDashboard from "@/components/CandidatesDashboard";
 import ExperiencesAnalysisDashboard from "@/components/ExperiencesAnalysisDashboard";
 import UserRecords from "@/components/UserRecords";
+import AprovacoesViagens from "@/components/ExperiencesDisp";
+import ExperiencesDisp from "@/components/ExperiencesDisp";
 
 
 const Hause = () => {
@@ -39,6 +41,7 @@ const Hause = () => {
           <Route path="/CandidatesDashboard" element={<CandidatesDashboard />} />
             <Route path="experience-approvals" element={<ExperiencesAnalysisDashboard />} />
             <Route path="user-records" element={<UserRecords />} />
+            <Route path="experience-records" element={<ExperiencesDisp />} />
        
 
 
