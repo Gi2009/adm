@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Aprovações de Viagens", href: "/travel-approvals", icon: MapPin },
-  { name: "Aprovações de Experiências", href: "/Hause/ExperiencesAnalysisDashboard", icon: Star },
-  { name: "Registro de Usuários", href: "/user-records", icon: Users },
+  { name: "Aprovações de Experiências", href: "experience-approvals", icon: Star },
+  { name: "Registro de Usuários", href: "user-records", icon: Users },
   { name: "Aprovar donos de experiencia", href: "/Hause/CandidatesDashboard", icon: Users },
   { name: "Registro de Experiências", href: "/experience-records", icon: FileText },
   { name: "Chat de Ajuda", href: "/help-chat", icon: MessageCircle },

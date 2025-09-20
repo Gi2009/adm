@@ -26,6 +26,7 @@ import Sidebar from "@/components/SideBar";
 import Dashboard from "@/components/Dashboard";
 import CandidatesDashboard from "@/components/CandidatesDashboard";
 import ExperiencesAnalysisDashboard from "@/components/ExperiencesAnalysisDashboard";
+import UserRecords from "@/components/UserRecords";
 
 
 const Hause = () => {
@@ -37,6 +38,7 @@ const Hause = () => {
            <Route path="/" element={<Dashboard />} />
           <Route path="/CandidatesDashboard" element={<CandidatesDashboard />} />
             <Route path="experience-approvals" element={<ExperiencesAnalysisDashboard />} />
+            <Route path="user-records" element={<UserRecords />} />
        
 
 
