@@ -27,7 +27,6 @@ const Login = () => {
 
       if (error) throw error;
 
-      // Check user profile type
       const { data: profile } = await supabase
         .from('profiles')
         .select('type')
@@ -56,21 +55,21 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-50 via-white to-green-100 p-4">
+      <Card className="w-full max-w-md shadow-lg border border-green-200 rounded-xl">
+        <CardHeader className="bg-green-600 text-white rounded-t-xl p-4">
           <div className="flex items-center gap-2">
-            <LogIn className="h-6 w-6 text-primary" />
-            <CardTitle>Login</CardTitle>
+            <LogIn className="h-6 w-6 text-white" />
+            <CardTitle className="text-lg font-semibold">Login</CardTitle>
           </div>
-          <CardDescription>
+          <CardDescription className="text-green-100 mt-1">
             Entre com suas credenciais para acessar o sistema
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-green-700">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -78,11 +77,12 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="border-green-300 focus:border-green-500 focus:ring focus:ring-green-200 transition"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password" className="text-green-700">Senha</Label>
               <Input
                 id="password"
                 type="password"
@@ -90,12 +90,13 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="border-green-300 focus:border-green-500 focus:ring focus:ring-green-200 transition"
               />
             </div>
             
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition"
               disabled={loading}
             >
               {loading ? "Entrando..." : "Entrar"}
