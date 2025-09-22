@@ -56,97 +56,98 @@ useEffect(() => {
   };
 
   const handleApprove = async (candidate: Candidate) => {
-    if (!candidate.email || !candidate.nome) {
-      toast({
-        title: "Erro",
-        description: "Candidato precisa ter email e nome para ser aprovado.",
-        variant: "destructive",
-      });
-      return;
-    }
+  if (!candidate.email || !candidate.nome) {
+    toast({
+      title: "Erro",
+      description: "Candidato precisa ter email e nome para ser aprovado.",
+      variant: "destructive",
+    });
+    return;
+  }
 
-    setProcessingId(candidate.id);
+  setProcessingId(candidate.id);
 
-    try {
-      // Gerar token único
-      const token = crypto.randomUUID();
+  try {
+    // Gerar token único
+    const token = crypto.randomUUID();
 
-      // Procurar perfil existente por telefone (já que não temos email em profiles)
-      const { data: existingProfiles } = await supabase
+    // Procurar perfil existente por EMAIL (agora comparando por email)
+    const { data: existingProfiles } = await supabase
+      .from('profiles')
+      .select('user_id, type, nome, telefone, local, "associação", email')
+      .eq('email', candidate.email);
+    
+    let userId = existingProfiles?.[0]?.user_id;
+
+    // Se existe perfil com mesmo EMAIL, atualizar informações e tipo para 2
+    if (userId && candidate.email) {
+      const existingProfile = existingProfiles[0];
+      const { error: updateProfileError } = await supabase
         .from('profiles')
-        .select('user_id, type, nome, telefone, local, "associação"')
-        .eq('telefone', candidate.telefone);
-      
-      let userId = existingProfiles?.[0]?.user_id;
+        .update({
+          type: '2', // Atualizar tipo para 2
+          nome: candidate.nome || existingProfile.nome,
+          telefone: candidate.telefone || existingProfile.telefone,
+          local: candidate.municipio || existingProfile.local,
+          'associação': candidate.associacao || existingProfile.associação,
+          email: candidate.email // Adicionar o campo email obrigatório
+        })
+        .eq('user_id', userId);
 
-      // Se existe perfil com mesmo telefone, atualizar informações e tipo
-      if (userId && candidate.telefone) {
-        const existingProfile = existingProfiles[0];
-        const { error: updateProfileError } = await supabase
-          .from('profiles')
-          .update({
-            type: '2',
-            nome: candidate.nome || existingProfile.nome,
-            telefone: candidate.telefone || existingProfile.telefone,
-            local: candidate.municipio || existingProfile.local,
-            'associação': candidate.associacao || existingProfile.associação,
-          })
-          .eq('user_id', userId);
-
-        if (updateProfileError) throw updateProfileError;
-      }
-
-      // Inserir na tabela de candidatos aprovados
-      const { error: insertError } = await supabase
-        .from('candidatos_aprovados')
-        .insert({
-          candidato_id: candidate.id,
-          email: candidate.email,
-          nome: candidate.nome,
-          token: token
-        });
-
-      if (insertError) throw insertError;
-
-      // Enviar email de aprovação
-      const { error: emailError } = await supabase.functions.invoke('candidate-email', {
-        body: {
-          email: candidate.email,
-          nome: candidate.nome,
-          type: 'approved',
-          token: token
-        }
-      });
-
-      if (emailError) throw emailError;
-
-      // Remover candidato da lista após aprovação
-      const { error: deleteError } = await supabase
-        .from('candidatos_oferec')
-        .delete()
-        .eq('id', candidate.id);
-
-      if (deleteError) throw deleteError;
-
-      toast({
-        title: "Sucesso!",
-        description: `Candidato ${candidate.nome} aprovado e email enviado. ${userId ? 'Perfil atualizado para tipo 2.' : 'Usuário poderá se registrar como tipo 2.'}`,
-      });
-
-      // Atualizar lista
-      fetchCandidates();
-
-    } catch (error: any) {
-      console.error('Error approving candidate:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao aprovar candidato. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setProcessingId(null);
+      if (updateProfileError) throw updateProfileError;
     }
-  };
+
+    // Inserir na tabela de candidatos aprovados
+    const { error: insertError } = await supabase
+      .from('candidatos_aprovados')
+      .insert({
+        candidato_id: candidate.id,
+        email: candidate.email,
+        nome: candidate.nome,
+        token: token
+      });
+
+    if (insertError) throw insertError;
+
+    // Enviar email de aprovação
+    const { error: emailError } = await supabase.functions.invoke('candidate-email', {
+      body: {
+        email: candidate.email,
+        nome: candidate.nome,
+        type: 'approved',
+        token: token
+      }
+    });
+
+    if (emailError) throw emailError;
+
+    // Remover candidato da lista após aprovação
+    const { error: deleteError } = await supabase
+      .from('candidatos_oferec')
+      .delete()
+      .eq('id', candidate.id);
+
+    if (deleteError) throw deleteError;
+
+    toast({
+      title: "Sucesso!",
+      description: `Candidato ${candidate.nome} aprovado e email enviado. ${userId ? 'Perfil atualizado para tipo 2.' : 'Usuário poderá se registrar como tipo 2.'}`,
+    });
+
+    // Atualizar lista
+    fetchCandidates();
+
+  } catch (error: any) {
+    console.error('Error approving candidate:', error);
+    toast({
+      title: "Erro",
+      description: "Erro ao aprovar candidato. Tente novamente.",
+      variant: "destructive",
+    });
+  } finally {
+    setProcessingId(null);
+  }
+};
 
   const handleReject = async (candidate: Candidate) => {
     if (!candidate.email || !candidate.nome) {

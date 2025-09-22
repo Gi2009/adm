@@ -7,7 +7,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, metadata?: any) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string, metadata?: any) => Promise<{ error: AuthError | null; data?: { user: User | null } }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
 }
@@ -66,40 +66,47 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const signUp = async (email: string, password: string, metadata?: any) => {
-    setLoading(true);
-    
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: metadata || {}
-      }
-    });
-
-    if (!error && metadata) {
-      // Update profile with additional data after signup
-      setTimeout(async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase
-            .from('profiles')
-            .update({
-              nome: metadata.nome,
-              telefone: metadata.telefone,
-              cpf: metadata.cpf
-            })
-            .eq('user_id', user.id);
-        }
-      }, 1000);
+ const signUp = async (email: string, password: string, metadata?: any) => {
+  setLoading(true);
+  
+  const redirectUrl = `${window.location.origin}/`;
+  
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: redirectUrl,
+      data: metadata || {}
     }
+  });
 
-    setLoading(false);
-    return { error };
-  };
+  if (!error && data.user) {
+    try {
+      // CORREÇÃO: Remover o campo 'id' e usar apenas 'user_id'
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          user_id: data.user.id, // ← Apenas user_id, SEM o campo id
+          email: email,
+          nome: metadata?.nome || '',
+          telefone: metadata?.telefone || '',
+          cpf: metadata?.cpf || '',
+          type: '1',
+          updated_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+        });
+
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+      }
+    } catch (profileError) {
+      console.error('Error creating profile:', profileError);
+    }
+  }
+
+  setLoading(false);
+  return { error, data };
+};
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);

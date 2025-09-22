@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+        candidatos_aprovados: {
+        Row: {
+          candidato_id: number
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          nome: string | null
+          token: string
+          usado: boolean
+        }
+        Insert: {
+          candidato_id: number
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          nome?: string | null
+          token: string
+          usado?: boolean
+        }
+        Update: {
+          candidato_id?: number
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          nome?: string | null
+          token?: string
+          usado?: boolean
+        }
+        Relationships: []
+      }
       candidatos_oferec: {
         Row: {
           associacao: string | null
@@ -255,8 +288,10 @@ export type Database = {
           updated_at: string
           user_id: string
           foto_usu: string
+          email: string
         }
         Insert: {
+          email: string
           associação?: string | null
           cpf: string
           created_at?: string
@@ -270,6 +305,7 @@ export type Database = {
           foto_usu?: string
         }
         Update: {
+          email: string
           associação?: string | null
           cpf?: string
           created_at?: string

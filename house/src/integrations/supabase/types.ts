@@ -47,6 +47,8 @@ export type Database = {
         }
         Relationships: []
       }
+      
+      
       candidatos_oferec: {
         Row: {
           associacao: string | null
@@ -219,6 +221,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          email: string,
           associação: string | null
           cpf: string
           created_at: string
@@ -231,6 +234,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+           email: string,
           associação?: string | null
           cpf: string
           created_at?: string
@@ -243,6 +247,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+           email: string,
           associação?: string | null
           cpf?: string
           created_at?: string

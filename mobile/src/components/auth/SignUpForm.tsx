@@ -20,6 +20,9 @@ export const SignUpForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { signUp } = useAuth();
 
+
+  
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -69,7 +72,7 @@ export const SignUpForm = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await signUp(formData.email, formData.password, {
+      const { error, data } = await signUp(formData.email, formData.password, {
         nome: formData.nome,
         telefone: formData.telefone,
         cpf: formData.cpf.replace(/\D/g, ''),
@@ -80,19 +83,32 @@ export const SignUpForm = () => {
           title: "Erro no cadastro",
           description: error.message === "User already registered" 
             ? "Este email já está cadastrado" 
-            : error.message,
+            : "Erro ao criar conta. Tente novamente.",
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: "Cadastro realizado!",
-          description: "Verifique seu email para acessar !",
-        });
+        return;
       }
+
+      toast({
+        title: "Cadastro realizado!",
+        description: "Verifique seu email para confirmar sua conta!",
+      });
+
+      // Reset form
+      setFormData({
+        nome: "",
+        email: "",
+        telefone: "",
+        cpf: "",
+        password: "",
+        confirmPassword: "",
+      });
+
     } catch (error) {
+      console.error('Erro geral no cadastro:', error);
       toast({
         title: "Erro",
-        description: "Ocorreu um erro inesperado",
+        description: "Ocorreu um erro inesperado durante o cadastro",
         variant: "destructive",
       });
     } finally {
@@ -116,6 +132,7 @@ export const SignUpForm = () => {
             onChange={(e) => handleInputChange("nome", e.target.value)}
             className="pl-10"
             disabled={isLoading}
+            required
           />
         </div>
       </div>
@@ -134,6 +151,7 @@ export const SignUpForm = () => {
             onChange={(e) => handleInputChange("email", e.target.value)}
             className="pl-10"
             disabled={isLoading}
+            required
           />
         </div>
       </div>
@@ -171,6 +189,7 @@ export const SignUpForm = () => {
               onChange={(e) => handleInputChange("cpf", formatCPF(e.target.value))}
               className="pl-10"
               disabled={isLoading}
+              maxLength={14}
             />
           </div>
         </div>
@@ -190,6 +209,8 @@ export const SignUpForm = () => {
             onChange={(e) => handleInputChange("password", e.target.value)}
             className="pl-10 pr-10"
             disabled={isLoading}
+            required
+            minLength={6}
           />
           <button
             type="button"
@@ -216,6 +237,8 @@ export const SignUpForm = () => {
             onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
             className="pl-10 pr-10"
             disabled={isLoading}
+            required
+            minLength={6}
           />
           <button
             type="button"
