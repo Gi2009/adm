@@ -200,6 +200,7 @@ export type Database = {
           user_id: string
           experiencia_id: number
           data_compra: string
+  
           status: string
           valor: number
           detalhes_pagamento: Json | null
