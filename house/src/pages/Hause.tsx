@@ -27,8 +27,10 @@ import Dashboard from "@/components/Dashboard";
 import CandidatesDashboard from "@/components/CandidatesDashboard";
 import ExperiencesAnalysisDashboard from "@/components/ExperiencesAnalysisDashboard";
 import UserRecords from "@/components/UserRecords";
-import AprovacoesViagens from "@/components/ExperiencesDisp";
+
 import ExperiencesDisp from "@/components/ExperiencesDisp";
+import ComprasExperiencias from "@/components/ComprasRecords";
+import RefundManagement from "@/components/Reembolso";
 
 
 const Hause = () => {
@@ -37,12 +39,13 @@ const Hause = () => {
       <Sidebar />
       <div className="flex-1 ml-64">
         <Routes>
-           <Route path="/" element={<Dashboard />} />
+          
           <Route path="/CandidatesDashboard" element={<CandidatesDashboard />} />
             <Route path="experience-approvals" element={<ExperiencesAnalysisDashboard />} />
             <Route path="user-records" element={<UserRecords />} />
             <Route path="experience-records" element={<ExperiencesDisp />} />
-       
+            <Route path="travel-approvals" element={<ComprasExperiencias />} />
+             <Route path="Reembolso" element={<RefundManagement />} />
 
 
         </Routes>

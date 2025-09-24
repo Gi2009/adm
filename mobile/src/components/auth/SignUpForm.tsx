@@ -20,9 +20,6 @@ export const SignUpForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { signUp } = useAuth();
 
-
-  
-
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };

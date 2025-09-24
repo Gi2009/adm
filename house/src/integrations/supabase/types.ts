@@ -142,6 +142,112 @@ export type Database = {
   }
   Relationships: []
 }
+
+ compras_experiencias: {
+      Row: {
+        id: number
+        user_id: string | null
+        experiencia_id: number | null
+        data_compra: string | null
+        status: string | null
+        valor: number
+        detalhes_pagamento: Json | null
+        created_at: string | null
+        quantidade_ingressos: number | null
+        data_experiencia: string | null
+      }
+      Insert: {
+        id?: number
+        user_id?: string | null
+        experiencia_id?: number | null
+        data_compra?: string | null
+        status?: string | null
+        valor: number
+        detalhes_pagamento?: Json | null
+        created_at?: string | null
+        quantidade_ingressos?: number | null
+        data_experiencia?: string | null
+      }
+      Update: {
+        id?: number
+        user_id?: string | null
+        experiencia_id?: number | null
+        data_compra?: string | null
+        status?: string | null
+        valor?: number
+        detalhes_pagamento?: Json | null
+        created_at?: string | null
+        quantidade_ingressos?: number | null
+        data_experiencia?: string | null
+      }
+      Relationships: [
+        {
+          foreignKeyName: "compras_experiencias_user_id_fkey"
+          columns: ["user_id"]
+          isOneToOne: false
+          referencedRelation: "users"
+          referencedColumns: ["id"]
+        },
+        {
+          foreignKeyName: "compras_experiencias_experiencia_id_fkey"
+          columns: ["experiencia_id"]
+          isOneToOne: false
+          referencedRelation: "experiencias_dis"
+          referencedColumns: ["id"]
+        }
+      ]
+    }
+
+solicitacoes_reembolso: {
+        Row: {
+          id: number
+          compra_id: number
+          user_id: string
+          motivo: string
+          status: string
+          valor: number
+          data_solicitacao: string
+          data_resolucao: string | null
+          resposta_admin: string | null
+        }
+        Insert: {
+          id?: number
+          compra_id: number
+          user_id: string
+          motivo: string
+          status?: string
+          valor: number
+          data_solicitacao?: string
+          data_resolucao?: string | null
+          resposta_admin?: string | null
+        }
+        Update: {
+          id?: number
+          compra_id?: number
+          user_id?: string
+          motivo?: string
+          status?: string
+          valor?: number
+          data_solicitacao?: string
+          data_resolucao?: string | null
+          resposta_admin?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitacoes_reembolso_compra_id_fkey"
+            columns: ["compra_id"]
+            referencedRelation: "compras_experiencias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_reembolso_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+
       experiencias_dis: {
   Row: {
     created_at: string

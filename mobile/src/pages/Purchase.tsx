@@ -1,12 +1,15 @@
 // components/purchases/PurchasesPage.tsx
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { usePurchases } from "@/hooks/usePurchases";
 import { supabase } from "@/integrations/supabase/client";
 import ExperienceDetails from "@/components/experiences/ExperienceDetails";
-import { Loader2, ShoppingBag, Calendar, CheckCircle, Users, Undo2 } from "lucide-react";
+import { Loader2, ShoppingBag, Calendar, CheckCircle, Users, Undo2, AlertCircle } from "lucide-react";
 
+// Interface corrigida para compatibilidade
 interface Purchase {
   id: number;
   user_id: string;
@@ -15,6 +18,9 @@ interface Purchase {
   status: string;
   valor: number;
   quantidade_ingressos?: number;
+  data_experiencia?: string;
+  motivo_reembolso?: string;
+  data_solicitacao_reembolso?: string;
   experiencias_dis: {
     id: number;
     titulo: string;
@@ -24,18 +30,26 @@ interface Purchase {
     descricao: string;
     incluso: string;
     quantas_p: number;
-    duração: string;
+    duracao: string; // Corrigido: era "duração" no código anterior
     tipo: number;
     data_experiencia: string;
+    created_at: string;
+    datas_disponiveis: string[];
+    id_dono: string;
   };
 }
 
 const PurchasesPage = () => {
   const { signOut } = useAuth();
-  const { purchases, loading: purchasesLoading } = usePurchases();
+  const { purchases, loading: purchasesLoading, refetch } = usePurchases(); // Corrigido: use refetch em vez de refreshPurchases
   const [selectedExperience, setSelectedExperience] = useState<any>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [processingRefunds, setProcessingRefunds] = useState<{[key: number]: boolean}>({});
+  const [refundDialog, setRefundDialog] = useState<{isOpen: boolean; purchase: Purchase | null}>({
+    isOpen: false,
+    purchase: null
+  });
+  const [refundReason, setRefundReason] = useState("");
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
@@ -61,30 +75,73 @@ const PurchasesPage = () => {
     return diffDays <= 7;
   };
 
-  const handleRefund = async (purchaseId: number) => {
+  const openRefundDialog = (purchase: Purchase) => {
+    setRefundDialog({ isOpen: true, purchase });
+    setRefundReason("");
+  };
+
+  const closeRefundDialog = () => {
+    setRefundDialog({ isOpen: false, purchase: null });
+    setRefundReason("");
+  };
+
+  const handleRefund = async () => {
+    if (!refundDialog.purchase || !refundReason.trim()) {
+      alert('Por favor, informe o motivo do reembolso.');
+      return;
+    }
+
+    const purchaseId = refundDialog.purchase.id;
+
     if (processingRefunds[purchaseId]) return;
 
     setProcessingRefunds(prev => ({ ...prev, [purchaseId]: true }));
 
     try {
-      // Aqui você implementaria a lógica de reembolso
-      // Por exemplo, chamar uma API ou atualizar o status no Supabase
+      // Primeiro, atualizar a tabela compras_experiencias
       const { error } = await supabase
         .from('compras_experiencias')
-        .update({ status: 'reembolsado' })
+        .update({ 
+          status: 'analise',
+          motivo_reembolso: refundReason,
+          data_solicitacao_reembolso: new Date().toISOString()
+        })
         .eq('id', purchaseId);
 
       if (error) {
         throw error;
       }
 
-      // Atualizar a lista de compras (você pode querer recarregar os dados)
-      alert('Reembolso solicitado com sucesso!');
-      // Recarregar a página ou atualizar o estado das compras
-      window.location.reload();
+      // Tentar inserir na tabela de solicitações de reembolso (se existir)
+      try {
+        const { error: logError } = await supabase
+          .from('solicitacoes_reembolso')
+          .insert({
+            compra_id: purchaseId,
+            user_id: refundDialog.purchase.user_id,
+            motivo: refundReason,
+            status: 'pendente',
+            valor: refundDialog.purchase.valor,
+            data_solicitacao: new Date().toISOString()
+          });
+
+        if (logError) {
+          console.log('Tabela solicitacoes_reembolso não existe ou erro ao inserir:', logError);
+          // Continua normalmente mesmo se a tabela extra não existir
+        }
+      } catch (logError) {
+        console.log('Tabela solicitacoes_reembolso não disponível');
+      }
+
+      alert('Solicitação de reembolso enviada para análise! Entraremos em contato em breve.');
+      
+      // Fechar o diálogo e recarregar as compras
+      closeRefundDialog();
+      refetch(); // Usar refetch em vez de refreshPurchases
+
     } catch (error) {
-      console.error('Erro ao processar reembolso:', error);
-      alert('Erro ao processar reembolso. Tente novamente.');
+      console.error('Erro ao processar solicitação de reembolso:', error);
+      alert('Erro ao processar solicitação de reembolso. Tente novamente.');
     } finally {
       setProcessingRefunds(prev => ({ ...prev, [purchaseId]: false }));
     }
@@ -146,7 +203,9 @@ const PurchasesPage = () => {
           ) : (
             <div className="grid grid-cols-1 gap-6">
               {purchases.map((purchase) => {
-                const canRefund = isRefundAvailable(purchase.data_compra) && purchase.status !== 'reembolsado';
+                const canRefund = isRefundAvailable(purchase.data_compra) && 
+                                 purchase.status !== 'reembolsado' && 
+                                 purchase.status !== 'analise';
                 
                 return (
                   <div key={purchase.id} className="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-blue-500">
@@ -172,18 +231,32 @@ const PurchasesPage = () => {
                               <span className="font-medium">{formatDateTime(purchase.data_compra)}</span>
                             </div>
                             
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 text-green-600" />
-                              <span className="text-sm text-gray-600">Experiência agendada:</span>
-                              <span className="font-medium text-green-700">
-                                {formatDateTime(purchase.data_experiencia)}
-                              </span>
-                            </div>
+                            {purchase.data_experiencia && (
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-green-600" />
+                                <span className="text-sm text-gray-600">Experiência agendada:</span>
+                                <span className="font-medium text-green-700">
+                                  {formatDate(purchase.data_experiencia)}
+                                </span>
+                              </div>
+                            )}
                             
                             <div className="flex items-center gap-2">
-                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              <CheckCircle className={`h-4 w-4 ${
+                                purchase.status === 'confirmado' ? 'text-green-600' :
+                                purchase.status === 'analise' ? 'text-yellow-600' :
+                                purchase.status === 'reembolsado' ? 'text-blue-600' :
+                                'text-gray-600'
+                              }`} />
                               <span className="text-sm text-gray-600">Status:</span>
-                              <span className="font-medium text-green-600 capitalize">{purchase.status}</span>
+                              <span className={`font-medium capitalize ${
+                                purchase.status === 'confirmado' ? 'text-green-600' :
+                                purchase.status === 'analise' ? 'text-yellow-600' :
+                                purchase.status === 'reembolsado' ? 'text-blue-600' :
+                                'text-gray-600'
+                              }`}>
+                                {purchase.status === 'analise' ? 'em análise' : purchase.status}
+                              </span>
                             </div>
                             
                             <div className="flex items-center gap-2">
@@ -211,34 +284,31 @@ const PurchasesPage = () => {
                             
                             {canRefund && (
                               <Button 
-                                onClick={() => handleRefund(purchase.id)}
+                                onClick={() => openRefundDialog(purchase)}
                                 variant="outline"
-                                disabled={processingRefunds[purchase.id]}
                                 className="border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800"
                               >
-                                {processingRefunds[purchase.id] ? (
-                                  <>
-                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                    Processando...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Undo2 className="h-4 w-4 mr-2" />
-                                    Solicitar Reembolso
-                                  </>
-                                )}
+                                <Undo2 className="h-4 w-4 mr-2" />
+                                Solicitar Reembolso
                               </Button>
                             )}
                             
                             {purchase.status === 'reembolsado' && (
-                              <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                              <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                 <CheckCircle className="h-4 w-4 mr-1" />
                                 Reembolsado
                               </span>
                             )}
                             
-                            {!canRefund && purchase.status !== 'reembolsado' && (
+                            {purchase.status === 'analise' && (
                               <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                <AlertCircle className="h-4 w-4 mr-1" />
+                                Reembolso em Análise
+                              </span>
+                            )}
+                            
+                            {!canRefund && purchase.status === 'confirmado' && (
+                              <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
                                 <Calendar className="h-4 w-4 mr-1" />
                                 Período de reembolso expirado
                               </span>
@@ -260,6 +330,73 @@ const PurchasesPage = () => {
           )}
         </div>
       </main>
+
+      {/* Diálogo de Solicitação de Reembolso */}
+      <Dialog open={refundDialog.isOpen} onOpenChange={closeRefundDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Undo2 className="h-5 w-5 text-red-600" />
+              Solicitar Reembolso
+            </DialogTitle>
+            <DialogDescription>
+              Informe o motivo da solicitação de reembolso para a experiência: 
+              <strong> {refundDialog.purchase?.experiencias_dis.titulo}</strong>
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="refund-reason" className="text-sm font-medium">
+                Motivo do reembolso *
+              </label>
+              <Textarea
+                id="refund-reason"
+                placeholder="Descreva o motivo da sua solicitação de reembolso..."
+                value={refundReason}
+                onChange={(e) => setRefundReason(e.target.value)}
+                className="min-h-[100px]"
+                required
+              />
+            </div>
+            
+            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+              <div className="flex items-center gap-2 text-yellow-800 text-sm">
+                <AlertCircle className="h-4 w-4" />
+                <span className="font-medium">Importante:</span>
+              </div>
+              <ul className="text-yellow-700 text-xs mt-1 space-y-1 list-disc list-inside">
+                <li>Reembolsos são avaliados em até 5 dias úteis</li>
+                <li>O valor será devolvido pelo mesmo método de pagamento</li>
+                <li>Após a análise, você receberá um e-mail com o resultado</li>
+              </ul>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={closeRefundDialog}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleRefund}
+              disabled={!refundReason.trim() || processingRefunds[refundDialog.purchase?.id || 0]}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {processingRefunds[refundDialog.purchase?.id || 0] ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <Undo2 className="h-4 w-4 mr-2" />
+                  Solicitar Reembolso
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ExperienceDetails
         experience={selectedExperience}

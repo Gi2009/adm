@@ -17,7 +17,8 @@ const navigation = [
   { name: "Registro de Usuários", href: "user-records", icon: Users },
   { name: "Aprovar donos de experiencia", href: "/Hause/CandidatesDashboard", icon: Users },
   { name: "Registro de Experiências", href: "experience-records", icon: FileText },
-  { name: "Chat de Ajuda", href: "/help-chat", icon: MessageCircle },
+  { name: "Solicitações de reembolso", href: "Reembolso", icon: FileText },
+  /*{ name: "Chat de Ajuda", href: "/help-chat", icon: MessageCircle },*/
 ];
 
 const Sidebar = () => {

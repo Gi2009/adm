@@ -200,7 +200,7 @@ export type Database = {
           user_id: string
           experiencia_id: number
           data_compra: string
-  
+          solicitacoes_reembolso: string
           status: string
           valor: number
           detalhes_pagamento: Json | null
@@ -247,6 +247,56 @@ export type Database = {
           }
         ]
       }
+solicitacoes_reembolso: {
+        Row: {
+          id: number
+          compra_id: number
+          user_id: string
+          motivo: string
+          status: string
+          valor: number
+          data_solicitacao: string
+          data_resolucao: string | null
+          resposta_admin: string | null
+        }
+        Insert: {
+          id?: number
+          compra_id: number
+          user_id: string
+          motivo: string
+          status?: string
+          valor: number
+          data_solicitacao?: string
+          data_resolucao?: string | null
+          resposta_admin?: string | null
+        }
+        Update: {
+          id?: number
+          compra_id?: number
+          user_id?: string
+          motivo?: string
+          status?: string
+          valor?: number
+          data_solicitacao?: string
+          data_resolucao?: string | null
+          resposta_admin?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitacoes_reembolso_compra_id_fkey"
+            columns: ["compra_id"]
+            referencedRelation: "compras_experiencias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_reembolso_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+
       favoritos: {
         Row: {
           created_at: string

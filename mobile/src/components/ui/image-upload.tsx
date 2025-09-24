@@ -83,7 +83,7 @@ export const ImageUpload = ({ value, onChange, onRemove }: ImageUploadProps) => 
 
   return (
     <div className="space-y-2">
-      <Label>Imagem da Experiência</Label>
+   
       
       {value ? (
         <div className="relative">

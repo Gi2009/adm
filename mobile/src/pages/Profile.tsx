@@ -70,7 +70,10 @@ const Profile = () => {
     // Atualizar o perfil do usuário com a nova URL do avatar
     const { error: updateError } = await supabase
       .from('profiles')
-      .update({ foto_usu: publicUrl })
+      .update({
+        foto_usu: publicUrl,
+        email: ""
+      })
       .eq('user_id', user.id);
 
     if (updateError) {

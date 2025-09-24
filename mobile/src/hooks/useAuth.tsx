@@ -66,47 +66,60 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
- const signUp = async (email: string, password: string, metadata?: any) => {
-  setLoading(true);
-  
-  const redirectUrl = `${window.location.origin}/`;
-  
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: redirectUrl,
-      data: metadata || {}
-    }
-  });
-
-  if (!error && data.user) {
-    try {
-      // CORREÇÃO: Remover o campo 'id' e usar apenas 'user_id'
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          user_id: data.user.id, // ← Apenas user_id, SEM o campo id
-          email: email,
-          nome: metadata?.nome || '',
-          telefone: metadata?.telefone || '',
-          cpf: metadata?.cpf || '',
-          type: '1',
-          updated_at: new Date().toISOString(),
-          created_at: new Date().toISOString(),
-        });
-
-      if (profileError) {
-        console.error('Error creating profile:', profileError);
+  const signUp = async (email: string, password: string, metadata?: any) => {
+    setLoading(true);
+    
+    const redirectUrl = `${window.location.origin}/`;
+    
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: metadata || {}
       }
-    } catch (profileError) {
-      console.error('Error creating profile:', profileError);
-    }
-  }
+    });
 
-  setLoading(false);
-  return { error, data };
-};
+    if (error) {
+      setLoading(false);
+      return { error, data };
+    }
+
+    // CORREÇÃO: Removemos a criação manual do perfil
+    // O perfil será criado automaticamente pelo trigger do Supabase
+    // Ou se não existir trigger, vamos usar UPSERT para evitar erro de duplicata
+
+    if (data.user) {
+      try {
+        // Usamos UPSERT em vez de INSERT para evitar erro de duplicata
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            user_id: data.user.id,
+            email: email,
+            nome: metadata?.nome || '',
+            telefone: metadata?.telefone || '',
+            cpf: metadata?.cpf || '',
+            type: '1',
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'user_id', // Evita duplicata
+            ignoreDuplicates: false // Atualiza se já existir
+          });
+
+        if (profileError) {
+          console.error('Error upserting profile:', profileError);
+          // Não retornamos erro aqui para não bloquear o cadastro
+        }
+      } catch (profileError) {
+        console.error('Error creating profile:', profileError);
+        // Continua mesmo com erro no perfil
+      }
+    }
+
+    setLoading(false);
+    return { error: null, data };
+  };
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);
