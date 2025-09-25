@@ -1,4 +1,15 @@
 {
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "type": "module",
+  "license": "ISC",
+  "description": "",
   "dependencies": {
     "@paypal/checkout-server-sdk": "^1.0.3",
     "body-parser": "^2.2.0",
