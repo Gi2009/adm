@@ -62,7 +62,7 @@ const PaypalRegistration = () => {
         <CardHeader>
           <Button
             variant="ghost"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(1)}
             className="w-fit p-0 mb-4"
           >
             <ArrowLeft className="mr-2" size={16} />

@@ -73,7 +73,7 @@ const App = () => (
                 <BottomNavbar />
               </ProtectedRoute>
             } />
-            // Adicione esta rota junto com as outras
+        
           <Route path="/paypal-registration" element={
             <ProtectedRoute>
             <PaypalRegistration/> 

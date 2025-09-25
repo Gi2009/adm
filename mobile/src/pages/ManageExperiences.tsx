@@ -869,7 +869,138 @@ const ComprasSection = () => {
                   </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* ... (formulário de experiência mantido igual) */}
+                 <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="titulo">Título *</Label>
+                    <Input
+                      id="titulo"
+                      value={formData.titulo}
+                      onChange={(e) => setFormData({...formData, titulo: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="local">Local *</Label>
+                    <Input
+                      id="local"
+                      value={formData.local}
+                      onChange={(e) => setFormData({...formData, local: e.target.value})}
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="descricao">Descrição</Label>
+                  <Textarea
+                    id="descricao"
+                    value={formData.descricao}
+                    onChange={(e) => setFormData({...formData, descricao: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="preco">Preço (R$)</Label>
+                    <Input
+                      id="preco"
+                      type="number"
+                      step="0.01"
+                      value={formData.preco}
+                      onChange={(e) => setFormData({...formData, preco: e.target.value})}
+                    />
+                  </div>
+                 
+                  <div>
+                    <Label htmlFor="duracao">Duração</Label>
+                    <Input
+                      id="duracao"
+                      value={formData.duracao}
+                      onChange={(e) => setFormData({...formData, duracao: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="quantas_p">Número de Pessoas</Label>
+                    <Input
+                      id="quantas_p"
+                      type="number"
+                      value={formData.quantas_p}
+                      onChange={(e) => setFormData({...formData, quantas_p: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Datas Disponíveis *</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start text-left font-normal">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDates.length > 0 
+                          ? `${selectedDates.length} data(s) selecionada(s)` 
+                          : 'Selecionar datas'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={undefined}
+                        onSelect={handleDateSelect}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                        locale={ptBR}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  {selectedDates.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-sm text-muted-foreground mb-1">Datas selecionadas:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedDates
+                          .sort((a, b) => a.getTime() - b.getTime())
+                          .map((date, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {format(date, 'dd/MM/yyyy')}
+                              <button
+                                type="button"
+                                onClick={() => setSelectedDates(selectedDates.filter(d => d.getTime() !== date.getTime()))}
+                                className="ml-1 text-red-500 hover:text-red-700"
+                              >
+                                ×
+                              </button>
+                            </Badge>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <ImageUpload
+                  value={formData.img}
+                  onChange={(url) => setFormData({...formData, img: url})}
+                  onRemove={() => setFormData({...formData, img: ''})}
+                />
+
+                <div>
+                  <Label htmlFor="incluso">Incluído na experiência</Label>
+                  <Textarea
+                    id="incluso"
+                    value={formData.incluso}
+                    onChange={(e) => setFormData({...formData, incluso: e.target.value})}
+                    rows={2}
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={resetForm}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700">
+                    {editingExperience ? 'Atualizar' : 'Criar'} Experiência
+                  </Button>
+                </div>
                 </form>
               </DialogContent>
             </Dialog>
