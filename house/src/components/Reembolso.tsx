@@ -58,7 +58,7 @@ const RefundManagement = () => {
       
       // Buscar explicitamente os campos de reembolso
       const { data: comprasData, error } = await supabase
-        .from("compras_experiencias")
+        .from("solicitacoes_reembolso")
         .select(`
           id,
           user_id,

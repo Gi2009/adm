@@ -819,6 +819,7 @@ const ComprasSection = () => {
       </div>
     );
   }
+  else{
 
   // Conteúdo para usuários tipo 2 (com seção de compras adicionada)
   return (
@@ -847,7 +848,58 @@ const ComprasSection = () => {
                   </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleBankSubmit} className="space-y-4">
-                  {/* ... (formulário de dados bancários mantido igual) */}
+                  <div>
+        <Label htmlFor="email_paypal">Email do PayPal *</Label>
+        <Input
+          id="email_paypal"
+          type="email"
+          value={bankData.email_paypal}
+          onChange={(e) => setBankData({...bankData, email_paypal: e.target.value})}
+          placeholder="seu.email@paypal.com"
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="nome_titular">Nome do Titular *</Label>
+        <Input
+          id="nome_titular"
+          value={bankData.nome_titular}
+          onChange={(e) => setBankData({...bankData, nome_titular: e.target.value})}
+          placeholder="Nome completo como cadastrado no PayPal"
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="cpf_titular">CPF do Titular *</Label>
+        <Input
+          id="cpf_titular"
+          value={bankData.cpf_titular}
+          onChange={(e) => setBankData({...bankData, cpf_titular: e.target.value})}
+          placeholder="000.000.000-00"
+          required
+        />
+      </div>
+
+      <div className="flex gap-2 pt-2">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={() => setIsBankDialogOpen(false)}
+          className="flex-1"
+        >
+          Cancelar
+        </Button>
+        <Button 
+          type="submit" 
+          className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+        >
+          {hasBankData ? 'Atualizar' : 'Salvar'}
+        </Button>
+      </div>
+
+
                 </form>
               </DialogContent>
             </Dialog>
@@ -1089,5 +1141,6 @@ const ComprasSection = () => {
     </div>
   );
 };
+}
 
 export default ManageExperiences;

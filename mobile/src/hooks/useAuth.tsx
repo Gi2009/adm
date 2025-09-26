@@ -40,15 +40,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    // Primeiro, verifique a sessão atual
+    const getInitialSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    };
+
+    getInitialSession();
+
+    // Depois configure o listener para mudanças de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        console.log('Auth event:', event, session);
+        
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Navigate based on auth state
         if (event === 'SIGNED_IN' && session) {
+          // Aguarde um pouco antes de criar o perfil para evitar conflitos
+          setTimeout(async () => {
+            await createUserProfile(session.user);
+          }, 1000);
           navigate('/');
         } else if (event === 'SIGNED_OUT') {
           navigate('/auth');
@@ -56,82 +71,128 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  // Função separada para criar perfil
+  const createUserProfile = async (user: User) => {
+    try {
+      // Verifique se o perfil já existe antes de criar
+      const { data: existingProfile, error: checkError } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('Error checking profile:', checkError);
+      }
+
+      // Se o perfil não existir, crie
+      if (!existingProfile) {
+        const { error } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.id,
+            email: user.email,
+            nome: user.user_metadata?.nome || '',
+            telefone: user.user_metadata?.telefone || '',
+            cpf: user.user_metadata?.cpf || '',
+            type: '1',
+            updated_at: new Date().toISOString(),
+          });
+
+        if (error) {
+          console.error('Error creating profile:', error);
+          // Tente um upsert como fallback
+          const { error: upsertError } = await supabase
+            .from('profiles')
+            .upsert({
+              user_id: user.id,
+              email: user.email,
+              nome: user.user_metadata?.nome || '',
+              telefone: user.user_metadata?.telefone || '',
+              cpf: user.user_metadata?.cpf || '',
+              type: '1',
+              updated_at: new Date().toISOString(),
+            }, {
+              onConflict: 'user_id'
+            });
+
+          if (upsertError) {
+            console.error('Error upserting profile:', upsertError);
+          }
+        } else {
+          console.log('Profile created successfully');
+        }
+      }
+    } catch (error) {
+      console.error('Error in createUserProfile:', error);
+    }
+  };
+
+  // signUp simplificado - SEM tentar criar perfil durante o signup
   const signUp = async (email: string, password: string, metadata?: any) => {
     setLoading(true);
     
-    const redirectUrl = `${window.location.origin}/`;
+    const redirectUrl = `${window.location.origin}/auth/callback`;
     
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: metadata || {}
-      }
-    });
-
-    if (error) {
-      setLoading(false);
-      return { error, data };
-    }
-
-    // CORREÇÃO: Removemos a criação manual do perfil
-    // O perfil será criado automaticamente pelo trigger do Supabase
-    // Ou se não existir trigger, vamos usar UPSERT para evitar erro de duplicata
-
-    if (data.user) {
-      try {
-        // Usamos UPSERT em vez de INSERT para evitar erro de duplicata
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            user_id: data.user.id,
-            email: email,
-            nome: metadata?.nome || '',
-            telefone: metadata?.telefone || '',
-            cpf: metadata?.cpf || '',
-            type: '1',
-            updated_at: new Date().toISOString(),
-          }, {
-            onConflict: 'user_id', // Evita duplicata
-            ignoreDuplicates: false // Atualiza se já existir
-          });
-
-        if (profileError) {
-          console.error('Error upserting profile:', profileError);
-          // Não retornamos erro aqui para não bloquear o cadastro
+    try {
+      console.log('Starting signup process...');
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: metadata || {}
         }
-      } catch (profileError) {
-        console.error('Error creating profile:', profileError);
-        // Continua mesmo com erro no perfil
-      }
-    }
+      });
 
-    setLoading(false);
-    return { error: null, data };
+      console.log('Signup response:', { data, error });
+
+      if (error) {
+        console.error('Signup error:', error);
+        setLoading(false);
+        return { error, data };
+      }
+
+      setLoading(false);
+      return { error: null, data };
+    } catch (error) {
+      console.error('Unexpected signup error:', error);
+      setLoading(false);
+      return { 
+        error: { 
+          name: 'AuthError', 
+          message: 'Erro inesperado durante o cadastro',
+          status: 500 
+        } as AuthError 
+      };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    return { error };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      setLoading(false);
+      return { error };
+    } catch (error) {
+      setLoading(false);
+      return { error: error as AuthError };
+    }
   };
 
   const signOut = async () => {
     setLoading(true);
-    await supabase.auth.signOut();
-    setLoading(false);
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Signout error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const value = {

@@ -72,7 +72,7 @@ const Profile = () => {
       .from('profiles')
       .update({
         foto_usu: publicUrl,
-        email: ""
+        email: user.email
       })
       .eq('user_id', user.id);
 
