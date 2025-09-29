@@ -16,44 +16,57 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
+  try {
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError) throw authError;
+
+    // Aguardar um pouco para a sessão estabilizar
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Tentar buscar o perfil, mas continuar mesmo se falhar
+    let profileType = null;
+    
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      // Check user profile type
       const { data: profile } = await supabase
         .from('profiles')
         .select('type')
-        .eq('user_id', data.user.id)
-        .single();
+        .eq('user_id', authData.user.id)
+        .maybeSingle();
 
-      if (profile?.type === '3') {
-        navigate('/Hause');
-      } else {
-        navigate('/');
-      }
-
-      toast({
-        title: "Login realizado com sucesso!",
-        description: "Bem-vindo de volta.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erro no login",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      profileType = profile?.type;
+    } catch (profileError) {
+      console.warn('Não foi possível carregar o perfil:', profileError);
+      // Continua mesmo sem o perfil
     }
-  };
+
+    // Redirecionar baseado no tipo ou para página padrão
+    if (profileType === '3') {
+      navigate('/Hause');
+    } else {
+      navigate('/');
+    }
+
+    toast({
+      title: "Login realizado com sucesso!",
+      description: "Bem-vindo de volta.",
+    });
+  } catch (error: any) {
+    toast({
+      title: "Erro no login",
+      description: error.message,
+      variant: "destructive",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">

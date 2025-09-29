@@ -4,12 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
-import { usePurchases } from "@/hooks/usePurchases";
 import { supabase } from "@/integrations/supabase/client";
 import ExperienceDetails from "@/components/experiences/ExperienceDetails";
-import { Loader2, ShoppingBag, Calendar, CheckCircle, Users, Undo2, AlertCircle } from "lucide-react";
+import { Loader2, ShoppingBag, Calendar, CheckCircle, Users, Undo2, AlertCircle, XCircle } from "lucide-react";
 
-// Interface corrigida para compatibilidade
+// Interface simplificada
 interface Purchase {
   id: number;
   user_id: string;
@@ -18,30 +17,18 @@ interface Purchase {
   status: string;
   valor: number;
   quantidade_ingressos?: number;
-  data_experiencia?: string;
-  motivo_reembolso?: string;
-  data_solicitacao_reembolso?: string;
-  experiencias_dis: {
-    id: number;
-    titulo: string;
-    img: string;
-    local: string;
-    preco: number;
-    descricao: string;
-    incluso: string;
-    quantas_p: number;
-    duracao: string; // Corrigido: era "duração" no código anterior
-    tipo: number;
-    data_experiencia: string;
-    created_at: string;
-    datas_disponiveis: string[];
-    id_dono: string;
-  };
+  data_experiencia?: string | null;
+  detalhes_pagamento?: any;
+  created_at?: string;
+  experiencia_titulo?: string;
+  experiencia_img?: string;
+  experiencia_local?: string;
 }
 
 const PurchasesPage = () => {
-  const { signOut } = useAuth();
-  const { purchases, loading: purchasesLoading, refetch } = usePurchases(); // Corrigido: use refetch em vez de refreshPurchases
+  const { user, signOut } = useAuth();
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedExperience, setSelectedExperience] = useState<any>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [processingRefunds, setProcessingRefunds] = useState<{[key: number]: boolean}>({});
@@ -51,12 +38,88 @@ const PurchasesPage = () => {
   });
   const [refundReason, setRefundReason] = useState("");
 
-  const formatDate = (dateString: string) => {
+  const fetchPurchases = async () => {
+    try {
+      setLoading(true);
+      
+      if (!user) return;
+
+      // Primeiro buscar as compras
+      const { data: comprasData, error } = await supabase
+        .from('compras_experiencias')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('data_compra', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar compras:', error);
+        throw error;
+      }
+
+      if (!comprasData) {
+        setPurchases([]);
+        return;
+      }
+
+      // Enriquecer os dados com informações das experiências
+      const purchasesEnriched = await Promise.all(
+        comprasData.map(async (compra) => {
+          try {
+            // Buscar informações da experiência
+            const { data: experienciaData } = await supabase
+              .from('experiencias_dis')
+              .select('titulo, img, local')
+              .eq('id', compra.experiencia_id)
+              .single();
+
+            return {
+              id: compra.id,
+              user_id: compra.user_id,
+              experiencia_id: compra.experiencia_id,
+              data_compra: compra.data_compra,
+              status: compra.status,
+              valor: compra.valor,
+              quantidade_ingressos: compra.quantidade_ingressos,
+              data_experiencia: compra.data_experiencia,
+              detalhes_pagamento: compra.detalhes_pagamento,
+              created_at: compra.created_at,
+              experiencia_titulo: experienciaData?.titulo || 'Experiência não encontrada',
+              experiencia_img: experienciaData?.img || '',
+              experiencia_local: experienciaData?.local || 'Local não informado'
+            };
+          } catch (error) {
+            console.error(`Erro ao buscar experiência ${compra.experiencia_id}:`, error);
+            return {
+              ...compra,
+              experiencia_titulo: 'Erro ao carregar',
+              experiencia_img: '',
+              experiencia_local: 'Erro ao carregar'
+            };
+          }
+        })
+      );
+      
+      console.log('Compras carregadas:', purchasesEnriched);
+      setPurchases(purchasesEnriched);
+    } catch (error) {
+      console.error('Erro ao buscar compras:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchPurchases();
+    }
+  }, [user]);
+
+  const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
-  const formatDateTime = (dateString: string) => {
+  const formatDateTime = (dateString: string | null | undefined) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -75,6 +138,46 @@ const PurchasesPage = () => {
     return diffDays <= 7;
   };
 
+  const getStatusInfo = (status: string) => {
+    switch (status) {
+      case 'confirmado':
+        return { 
+          text: 'Confirmado', 
+          color: 'text-green-600', 
+          bgColor: 'bg-green-100',
+          icon: CheckCircle 
+        };
+      case 'analise':
+        return { 
+          text: 'Reembolso em Análise', 
+          color: 'text-yellow-600', 
+          bgColor: 'bg-yellow-100',
+          icon: AlertCircle 
+        };
+      case 'reembolsado':
+        return { 
+          text: 'Reembolsado', 
+          color: 'text-blue-600', 
+          bgColor: 'bg-blue-100',
+          icon: CheckCircle 
+        };
+      case 'rejeitado':
+        return { 
+          text: 'Reembolso Rejeitado', 
+          color: 'text-red-600', 
+          bgColor: 'bg-red-100',
+          icon: XCircle 
+        };
+      default:
+        return { 
+          text: status, 
+          color: 'text-gray-600', 
+          bgColor: 'bg-gray-100',
+          icon: AlertCircle 
+        };
+    }
+  };
+
   const openRefundDialog = (purchase: Purchase) => {
     setRefundDialog({ isOpen: true, purchase });
     setRefundReason("");
@@ -85,74 +188,96 @@ const PurchasesPage = () => {
     setRefundReason("");
   };
 
-  const handleRefund = async () => {
-    if (!refundDialog.purchase || !refundReason.trim()) {
-      alert('Por favor, informe o motivo do reembolso.');
-      return;
+const handleRefund = async () => {
+  if (!refundDialog.purchase || !refundReason.trim()) {
+    alert('Por favor, informe o motivo do reembolso.');
+    return;
+  }
+
+  const purchaseId = refundDialog.purchase.id;
+
+  if (processingRefunds[purchaseId]) return;
+
+  setProcessingRefunds(prev => ({ ...prev, [purchaseId]: true }));
+
+  try {
+    // 1. Primeiro, atualizar o status da compra para 'analise'
+    const { error: updateError } = await supabase
+      .from('compras_experiencias')
+      .update({ 
+        status: 'analise',
+        motivo_reembolso: refundReason,
+        data_solicitacao_reembolso: new Date().toISOString()
+      })
+      .eq('id', purchaseId);
+
+    if (updateError) throw updateError;
+
+    // 2. Inserir na tabela de solicitações de reembolso
+    const { error: solicitacaoError } = await supabase
+      .from('solicitacoes_reembolso')
+      .insert({
+        compra_id: purchaseId,
+        user_id: user?.id,
+        motivo: refundReason,
+        status: 'pendente',
+        valor: refundDialog.purchase.valor,
+        data_solicitacao: new Date().toISOString()
+      });
+
+    if (solicitacaoError) {
+      console.error('Erro ao inserir na tabela de solicitações:', solicitacaoError);
+      // Não interrompe o fluxo, apenas registra o erro
     }
 
-    const purchaseId = refundDialog.purchase.id;
+    alert('Solicitação de reembolso enviada para análise! Entraremos em contato em breve.');
+    
+    closeRefundDialog();
+    
+    // 3. Atualizar a lista de compras imediatamente
+    setPurchases(prevPurchases => 
+      prevPurchases.map(purchase => 
+        purchase.id === purchaseId 
+          ? { 
+              ...purchase, 
+              status: 'analise',
+              motivo_reembolso: refundReason,
+              data_solicitacao_reembolso: new Date().toISOString()
+            }
+          : purchase
+      )
+    );
+    
+    // 4. Buscar dados atualizados do servidor
+    fetchPurchases();
 
-    if (processingRefunds[purchaseId]) return;
+  } catch (error) {
+    console.error('Erro ao processar solicitação de reembolso:', error);
+    alert('Erro ao processar solicitação de reembolso. Tente novamente.');
+  } finally {
+    setProcessingRefunds(prev => ({ ...prev, [purchaseId]: false }));
+  }
+};
 
-    setProcessingRefunds(prev => ({ ...prev, [purchaseId]: true }));
 
+  const handleCardClick = async (purchase: Purchase) => {
     try {
-      // Primeiro, atualizar a tabela compras_experiencias
-      const { error } = await supabase
-        .from('compras_experiencias')
-        .update({ 
-          status: 'analise',
-          motivo_reembolso: refundReason,
-          data_solicitacao_reembolso: new Date().toISOString()
-        })
-        .eq('id', purchaseId);
+      // Buscar detalhes completos da experiência
+      const { data: experienciaData } = await supabase
+        .from('experiencias_dis')
+        .select('*')
+        .eq('id', purchase.experiencia_id)
+        .single();
 
-      if (error) {
-        throw error;
-      }
-
-      // Tentar inserir na tabela de solicitações de reembolso (se existir)
-      try {
-        const { error: logError } = await supabase
-          .from('solicitacoes_reembolso')
-          .insert({
-            compra_id: purchaseId,
-            user_id: refundDialog.purchase.user_id,
-            motivo: refundReason,
-            status: 'pendente',
-            valor: refundDialog.purchase.valor,
-            data_solicitacao: new Date().toISOString()
-          });
-
-        if (logError) {
-          console.log('Tabela solicitacoes_reembolso não existe ou erro ao inserir:', logError);
-          // Continua normalmente mesmo se a tabela extra não existir
-        }
-      } catch (logError) {
-        console.log('Tabela solicitacoes_reembolso não disponível');
-      }
-
-      alert('Solicitação de reembolso enviada para análise! Entraremos em contato em breve.');
-      
-      // Fechar o diálogo e recarregar as compras
-      closeRefundDialog();
-      refetch(); // Usar refetch em vez de refreshPurchases
-
+      setSelectedExperience(experienciaData);
+      setIsDetailsOpen(true);
     } catch (error) {
-      console.error('Erro ao processar solicitação de reembolso:', error);
-      alert('Erro ao processar solicitação de reembolso. Tente novamente.');
-    } finally {
-      setProcessingRefunds(prev => ({ ...prev, [purchaseId]: false }));
+      console.error('Erro ao buscar detalhes da experiência:', error);
+      alert('Erro ao carregar detalhes da experiência.');
     }
   };
 
-  const handleCardClick = (experience: any) => {
-    setSelectedExperience(experience);
-    setIsDetailsOpen(true);
-  };
-
-  if (purchasesLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pb-20">
         <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-blue-200">
@@ -205,7 +330,11 @@ const PurchasesPage = () => {
               {purchases.map((purchase) => {
                 const canRefund = isRefundAvailable(purchase.data_compra) && 
                                  purchase.status !== 'reembolsado' && 
-                                 purchase.status !== 'analise';
+                                 purchase.status !== 'analise' &&
+                                 purchase.status !== 'rejeitado';
+                
+                const statusInfo = getStatusInfo(purchase.status);
+                const StatusIcon = statusInfo.icon;
                 
                 return (
                   <div key={purchase.id} className="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-blue-500">
@@ -213,15 +342,15 @@ const PurchasesPage = () => {
                       <div className="flex flex-col md:flex-row gap-6">
                         <div className="flex-shrink-0">
                           <img 
-                            src={purchase.experiencias_dis.img} 
-                            alt={purchase.experiencias_dis.titulo}
+                            src={purchase.experiencia_img || ''} 
+                            alt={purchase.experiencia_titulo || 'Experiência'}
                             className="w-48 h-32 object-cover rounded-lg"
                           />
                         </div>
                         
                         <div className="flex-1">
                           <h3 className="text-xl font-bold text-gray-900 mb-2">
-                            {purchase.experiencias_dis.titulo}
+                            {purchase.experiencia_titulo || 'Experiência não encontrada'}
                           </h3>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -242,20 +371,10 @@ const PurchasesPage = () => {
                             )}
                             
                             <div className="flex items-center gap-2">
-                              <CheckCircle className={`h-4 w-4 ${
-                                purchase.status === 'confirmado' ? 'text-green-600' :
-                                purchase.status === 'analise' ? 'text-yellow-600' :
-                                purchase.status === 'reembolsado' ? 'text-blue-600' :
-                                'text-gray-600'
-                              }`} />
+                              <StatusIcon className={`h-4 w-4 ${statusInfo.color}`} />
                               <span className="text-sm text-gray-600">Status:</span>
-                              <span className={`font-medium capitalize ${
-                                purchase.status === 'confirmado' ? 'text-green-600' :
-                                purchase.status === 'analise' ? 'text-yellow-600' :
-                                purchase.status === 'reembolsado' ? 'text-blue-600' :
-                                'text-gray-600'
-                              }`}>
-                                {purchase.status === 'analise' ? 'em análise' : purchase.status}
+                              <span className={`font-medium capitalize ${statusInfo.color}`}>
+                                {statusInfo.text}
                               </span>
                             </div>
                             
@@ -271,11 +390,16 @@ const PurchasesPage = () => {
                                 <span className="font-medium">{purchase.quantidade_ingressos}</span>
                               </div>
                             )}
+
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-600">Local:</span>
+                              <span className="font-medium">{purchase.experiencia_local}</span>
+                            </div>
                           </div>
-                          
+
                           <div className="flex flex-wrap gap-3">
                             <Button 
-                              onClick={() => handleCardClick(purchase.experiencias_dis)}
+                              onClick={() => handleCardClick(purchase)}
                               variant="outline"
                               className="border-blue-300 text-blue-700 hover:bg-blue-50"
                             >
@@ -293,26 +417,10 @@ const PurchasesPage = () => {
                               </Button>
                             )}
                             
-                            {purchase.status === 'reembolsado' && (
-                              <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Reembolsado
-                              </span>
-                            )}
-                            
-                            {purchase.status === 'analise' && (
-                              <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                <AlertCircle className="h-4 w-4 mr-1" />
-                                Reembolso em Análise
-                              </span>
-                            )}
-                            
-                            {!canRefund && purchase.status === 'confirmado' && (
-                              <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                                <Calendar className="h-4 w-4 mr-1" />
-                                Período de reembolso expirado
-                              </span>
-                            )}
+                            <span className={`inline-flex items-center px-3 py-2 rounded-full text-sm font-medium ${statusInfo.bgColor} ${statusInfo.color}`}>
+                              <StatusIcon className="h-4 w-4 mr-1" />
+                              {statusInfo.text}
+                            </span>
                           </div>
                           
                           {canRefund && (
@@ -341,7 +449,7 @@ const PurchasesPage = () => {
             </DialogTitle>
             <DialogDescription>
               Informe o motivo da solicitação de reembolso para a experiência: 
-              <strong> {refundDialog.purchase?.experiencias_dis.titulo}</strong>
+              <strong> {refundDialog.purchase?.experiencia_titulo || 'Experiência'}</strong>
             </DialogDescription>
           </DialogHeader>
           

@@ -1,4 +1,3 @@
-// src/pages/RefundManagement.tsx
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,20 +12,20 @@ import { Input } from "@/components/ui/input";
 interface RefundRequest {
   id: number;
   user_id: string;
-  experiencia_id: number;
-  data_compra: string;
+  compra_id: number;
+  motivo: string;
   status: string;
-  valor: number;
-  quantidade_ingressos: number;
-  data_experiencia: string | null;
-  motivo_reembolso: string | null;
-  data_solicitacao_reembolso: string | null;
+  valor: number | null;
+  data_solicitacao: string;
+  data_resolucao: string | null;
+  resposta_admin: string | null;
   user_nome: string;
   user_email: string;
   experiencia_titulo: string;
   experiencia_local: string;
-  detalhes_pagamento?: any;
-  created_at?: string;
+  quantidade_ingressos?: number;
+  data_compra?: string;
+  data_experiencia?: string | null;
 }
 
 const RefundManagement = () => {
@@ -56,97 +55,124 @@ const RefundManagement = () => {
     try {
       setLoading(true);
       
-      // Buscar explicitamente os campos de reembolso
-      const { data: comprasData, error } = await supabase
+      console.log('🔍 Buscando solicitações de reembolso...');
+      
+      // Buscar da tabela solicitacoes_reembolso
+      const { data: solicitacoesData, error } = await supabase
         .from("solicitacoes_reembolso")
         .select(`
           id,
+          compra_id,
           user_id,
-          experiencia_id,
-          data_compra,
+          motivo,
           status,
           valor,
-          quantidade_ingressos,
-          data_experiencia,
-          motivo_reembolso,
-          data_solicitacao_reembolso,
-          detalhes_pagamento,
-          created_at
+          data_solicitacao,
+          data_resolucao,
+          resposta_admin
         `)
-        .eq("status", "analise")
-        .order("data_solicitacao_reembolso", { ascending: false });
+        .in("status", ["pendente", "analise"])
+        .order("data_solicitacao", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("❌ Erro ao buscar solicitações:", error);
+        throw error;
+      }
 
-      if (!comprasData || comprasData.length === 0) {
+      console.log('✅ Solicitações encontradas:', solicitacoesData?.length || 0);
+
+      if (!solicitacoesData || solicitacoesData.length === 0) {
         setRefundRequests([]);
         return;
       }
 
-      // Enriquecer os dados com informações do usuário e experiência
+      // Enriquecer os dados com informações do usuário, compra e experiência
       const requestsEnriquecidas: RefundRequest[] = await Promise.all(
-        comprasData.map(async (compra) => {
+        solicitacoesData.map(async (solicitacao) => {
           try {
             // Buscar informações do usuário
             const { data: userProfile } = await supabase
               .from("profiles")
               .select("nome, email")
-              .eq("user_id", compra.user_id)
+              .eq("user_id", solicitacao.user_id)
+              .single();
+
+            // Buscar informações da compra
+            const { data: compraData } = await supabase
+              .from("compras_experiencias")
+              .select(`
+                experiencia_id,
+                quantidade_ingressos,
+                data_compra,
+                data_experiencia
+              `)
+              .eq("id", solicitacao.compra_id)
               .single();
 
             // Buscar informações da experiência
-            const { data: experienciaData } = await supabase
-              .from("experiencias_dis")
-              .select("titulo, local")
-              .eq("id", compra.experiencia_id)
-              .single();
+            let experienciaTitulo = "Experiência não encontrada";
+            let experienciaLocal = "Local não informado";
+
+            if (compraData?.experiencia_id) {
+              const { data: experienciaData } = await supabase
+                .from("experiencias_dis")
+                .select("titulo, local")
+                .eq("id", compraData.experiencia_id)
+                .single();
+
+              if (experienciaData) {
+                experienciaTitulo = experienciaData.titulo || `Experiência #${compraData.experiencia_id}`;
+                experienciaLocal = experienciaData.local || "Local não informado";
+              }
+            }
 
             return {
-              id: compra.id,
-              user_id: compra.user_id,
-              experiencia_id: compra.experiencia_id,
-              data_compra: compra.data_compra,
-              status: compra.status,
-              valor: compra.valor,
-              quantidade_ingressos: compra.quantidade_ingressos,
-              data_experiencia: compra.data_experiencia,
-              motivo_reembolso: compra.motivo_reembolso || null,
-              data_solicitacao_reembolso: compra.data_solicitacao_reembolso || null,
+              id: solicitacao.id,
+              user_id: solicitacao.user_id,
+              compra_id: solicitacao.compra_id,
+              motivo: solicitacao.motivo,
+              status: solicitacao.status,
+              valor: solicitacao.valor,
+              data_solicitacao: solicitacao.data_solicitacao,
+              data_resolucao: solicitacao.data_resolucao,
+              resposta_admin: solicitacao.resposta_admin,
               user_nome: userProfile?.nome || "Usuário não encontrado",
               user_email: userProfile?.email || "Email não disponível",
-              experiencia_titulo: experienciaData?.titulo || `Experiência #${compra.experiencia_id}`,
-              experiencia_local: experienciaData?.local || "Local não informado",
-              detalhes_pagamento: compra.detalhes_pagamento,
-              created_at: compra.created_at
+              experiencia_titulo: experienciaTitulo,
+              experiencia_local: experienciaLocal,
+              quantidade_ingressos: compraData?.quantidade_ingressos,
+              data_compra: compraData?.data_compra,
+              data_experiencia: compraData?.data_experiencia
             };
           } catch (error) {
-            console.error(`Erro ao enriquecer compra ${compra.id}:`, error);
+            console.error(`❌ Erro ao enriquecer solicitação ${solicitacao.id}:`, error);
             return {
-              id: compra.id,
-              user_id: compra.user_id,
-              experiencia_id: compra.experiencia_id,
-              data_compra: compra.data_compra,
-              status: compra.status,
-              valor: compra.valor,
-              quantidade_ingressos: compra.quantidade_ingressos,
-              data_experiencia: compra.data_experiencia,
-              motivo_reembolso: compra.motivo_reembolso || null,
-              data_solicitacao_reembolso: compra.data_solicitacao_reembolso || null,
+              id: solicitacao.id,
+              user_id: solicitacao.user_id,
+              compra_id: solicitacao.compra_id,
+              motivo: solicitacao.motivo,
+              status: solicitacao.status,
+              valor: solicitacao.valor,
+              data_solicitacao: solicitacao.data_solicitacao,
+              data_resolucao: solicitacao.data_resolucao,
+              resposta_admin: solicitacao.resposta_admin,
               user_nome: "Erro ao carregar",
               user_email: "Erro ao carregar",
-              experiencia_titulo: `Experiência #${compra.experiencia_id}`,
+              experiencia_titulo: `Experiência #${solicitacao.compra_id}`,
               experiencia_local: "Erro ao carregar",
-              detalhes_pagamento: compra.detalhes_pagamento,
-              created_at: compra.created_at
+              quantidade_ingressos: 0,
+              data_compra: new Date().toISOString(),
+              data_experiencia: null
             };
           }
         })
       );
 
+      console.log('📊 Solicitações enriquecidas:', requestsEnriquecidas.length);
       setRefundRequests(requestsEnriquecidas);
       
     } catch (error: any) {
-      console.error("Erro ao carregar solicitações de reembolso:", error);
+      console.error("💥 Erro ao carregar solicitações de reembolso:", error);
       toast({
         title: "Erro",
         description: "Não foi possível carregar as solicitações de reembolso.",
@@ -176,87 +202,101 @@ const RefundManagement = () => {
   };
 
   const handleDecision = async () => {
-    if (!decisionDialog.request || !decisionDialog.decision) return;
+  if (!decisionDialog.request || !decisionDialog.decision) return;
 
-    const requestId = decisionDialog.request.id;
-    setProcessingId(requestId);
+  const requestId = decisionDialog.request.id;
+  setProcessingId(requestId);
 
-    try {
-      const newStatus = decisionDialog.decision === 'approve' ? 'reembolsado' : 'confirmado';
-      
-      // Primeiro tentar atualizar com resposta_admin
-      let updateData: any = { 
+  try {
+    const newStatus = decisionDialog.decision === 'approve' ? 'aprovado' : 'rejeitado';
+    const dataResolucao = new Date().toISOString();
+    
+    console.log(`🔄 Processando ${newStatus} para solicitação ${requestId}`);
+    
+    // Atualizar a tabela solicitacoes_reembolso
+    const { error: updateError } = await supabase
+      .from('solicitacoes_reembolso')
+      .update({
         status: newStatus,
+        data_resolucao: dataResolucao,
         resposta_admin: adminResponse || `Reembolso ${decisionDialog.decision === 'approve' ? 'aprovado' : 'rejeitado'} pelo administrador.`
-      };
+      })
+      .eq('id', requestId);
 
-      const { error: updateError } = await supabase
+    if (updateError) {
+      console.error('❌ Erro ao atualizar solicitação:', updateError);
+      throw updateError;
+    }
+
+    // Se foi aprovado, também atualizar a compra para status 'reembolsado'
+    if (decisionDialog.decision === 'approve') {
+      const { error: compraError } = await supabase
         .from('compras_experiencias')
-        .update(updateData)
-        .eq('id', requestId);
+        .update({ 
+          status: 'reembolsado',
+          motivo_reembolso: decisionDialog.request.motivo,
+          data_solicitacao_reembolso: decisionDialog.request.data_solicitacao,
+          resposta_admin: adminResponse || 'Reembolso aprovado pelo administrador.'
+        })
+        .eq('id', decisionDialog.request.compra_id);
 
-      // Se der erro por coluna não existente, tentar sem resposta_admin
-      if (updateError && updateError.message.includes('resposta_admin')) {
-        const { error: retryError } = await supabase
-          .from('compras_experiencias')
-          .update({ status: newStatus })
-          .eq('id', requestId);
-
-        if (retryError) throw retryError;
-      } else if (updateError) {
-        throw updateError;
+      if (compraError) {
+        console.error('❌ Erro ao atualizar compra:', compraError);
+        throw compraError;
       }
+    } else {
+      // Se foi rejeitado, voltar o status da compra para 'confirmado'
+      const { error: compraError } = await supabase
+        .from('compras_experiencias')
+        .update({ 
+          status: 'confirmado',
+          resposta_admin: adminResponse || 'Solicitação de reembolso rejeitada.'
+        })
+        .eq('id', decisionDialog.request.compra_id);
 
-      // Tentar registrar na tabela de solicitações de reembolso
-      try {
-        const { error: logError } = await supabase
-          .from('solicitacoes_reembolso')
-          .update({
-            status: decisionDialog.decision === 'approve' ? 'aprovado' : 'rejeitado',
-            data_resolucao: new Date().toISOString(),
-            resposta_admin: adminResponse
-          })
-          .eq('compra_id', requestId);
-
-        if (logError) {
-          console.log('Tabela solicitacoes_reembolso não disponível para update');
-        }
-      } catch (logError) {
-        console.log('Tabela solicitacoes_reembolso não disponível');
+      if (compraError) {
+        console.warn('⚠️ Aviso: Não foi possível atualizar a compra:', compraError);
       }
+    }
 
-      toast({
-        title: "Sucesso!",
-        description: `Reembolso ${decisionDialog.decision === 'approve' ? 'aprovado' : 'rejeitado'} com sucesso.`,
+    console.log('✅ Decisão processada com sucesso');
+    
+    toast({
+      title: "Sucesso!",
+      description: `Reembolso ${decisionDialog.decision === 'approve' ? 'aprovado' : 'rejeitado'} com sucesso.`,
+    });
+
+    closeDecisionDialog();
+    fetchRefundRequests();
+
+  } catch (error: any) {
+    console.error('💥 Erro ao processar decisão:', error);
+    toast({
+      title: "Erro",
+      description: "Erro ao processar a decisão. Tente novamente.",
+      variant: "destructive",
+    });
+  } finally {
+    setProcessingId(null);
+  }
+};
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "Não informada";
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
       });
-
-      closeDecisionDialog();
-      fetchRefundRequests();
-
-    } catch (error: any) {
-      console.error('Erro ao processar decisão:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao processar a decisão. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setProcessingId(null);
+    } catch {
+      return "Data inválida";
     }
   };
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "Não informada";
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const formatCurrency = (value: number) => {
+  const formatCurrency = (value: number | null) => {
+    if (!value) return "R$ 0,00";
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
@@ -268,7 +308,7 @@ const RefundManagement = () => {
       request.user_nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.experiencia_titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (request.motivo_reembolso && request.motivo_reembolso.toLowerCase().includes(searchTerm.toLowerCase()));
+      request.motivo.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesFilter = filterStatus === "all" || request.status === filterStatus;
     
@@ -312,9 +352,9 @@ const RefundManagement = () => {
           <Card>
             <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Em Análise</p>
+                <p className="text-sm text-muted-foreground">Pendentes</p>
                 <p className="text-2xl font-bold text-yellow-600">
-                  {refundRequests.filter(r => r.status === 'analise').length}
+                  {refundRequests.filter(r => r.status === 'pendente').length}
                 </p>
               </div>
               <AlertCircle className="h-4 w-4 text-yellow-500" />
@@ -324,22 +364,24 @@ const RefundManagement = () => {
           <Card>
             <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Valor Total</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {formatCurrency(refundRequests.reduce((sum, r) => sum + r.valor, 0))}
+                <p className="text-sm text-muted-foreground">Em Análise</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {refundRequests.filter(r => r.status === 'analise').length}
                 </p>
               </div>
-              <DollarSign className="h-4 w-4 text-green-500" />
+              <AlertCircle className="h-4 w-4 text-orange-500" />
             </CardContent>
           </Card>
           
           <Card>
             <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Última Atualização</p>
-                <p className="text-sm font-medium">Agora</p>
+                <p className="text-sm text-muted-foreground">Valor Total</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {formatCurrency(refundRequests.reduce((sum, r) => sum + (r.valor || 0), 0))}
+                </p>
               </div>
-              <Calendar className="h-4 w-4 text-gray-500" />
+              <DollarSign className="h-4 w-4 text-green-500" />
             </CardContent>
           </Card>
         </div>
@@ -364,6 +406,13 @@ const RefundManagement = () => {
                   size="sm"
                 >
                   Todas
+                </Button>
+                <Button
+                  variant={filterStatus === "pendente" ? "secondary" : "outline"}
+                  onClick={() => setFilterStatus("pendente")}
+                  size="sm"
+                >
+                  Pendentes
                 </Button>
                 <Button
                   variant={filterStatus === "analise" ? "secondary" : "outline"}
@@ -401,12 +450,16 @@ const RefundManagement = () => {
                     <div>
                       <CardTitle className="text-lg">{request.experiencia_titulo}</CardTitle>
                       <CardDescription>
-                        Solicitação #{request.id} • {formatDate(request.data_solicitacao_reembolso)}
+                        Solicitação #{request.id} • {formatDate(request.data_solicitacao)}
                       </CardDescription>
                     </div>
-                    <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                    <Badge variant="outline" className={
+                      request.status === 'pendente' 
+                        ? "bg-yellow-100 text-yellow-800 border-yellow-300" 
+                        : "bg-orange-100 text-orange-800 border-orange-300"
+                    }>
                       <AlertCircle className="h-3 w-3 mr-1" />
-                      Em Análise
+                      {request.status === 'pendente' ? 'Pendente' : 'Em Análise'}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -442,27 +495,29 @@ const RefundManagement = () => {
                           <span className="text-muted-foreground">Valor: </span>
                           <span className="font-medium text-green-600">{formatCurrency(request.valor)}</span>
                         </div>
-                        <div>
-                          <span className="text-muted-foreground">Ingressos: </span>
-                          <span className="font-medium">{request.quantidade_ingressos}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Data compra: </span>
-                          <span className="font-medium">{formatDate(request.data_compra)}</span>
-                        </div>
+                        {request.quantidade_ingressos && (
+                          <div>
+                            <span className="text-muted-foreground">Ingressos: </span>
+                            <span className="font-medium">{request.quantidade_ingressos}</span>
+                          </div>
+                        )}
+                        {request.data_compra && (
+                          <div>
+                            <span className="text-muted-foreground">Data compra: </span>
+                            <span className="font-medium">{formatDate(request.data_compra)}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
 
                   {/* Motivo do Reembolso */}
-                  {request.motivo_reembolso && (
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-sm">Motivo do Reembolso</h4>
-                      <div className="bg-gray-50 rounded-md p-3 text-sm">
-                        {request.motivo_reembolso}
-                      </div>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm">Motivo do Reembolso</h4>
+                    <div className="bg-gray-50 rounded-md p-3 text-sm">
+                      {request.motivo}
                     </div>
-                  )}
+                  </div>
 
                   {/* Ações */}
                   <div className="flex gap-3 pt-4 border-t">
@@ -555,8 +610,8 @@ const RefundManagement = () => {
                   <p><strong>Usuário:</strong> {decisionDialog.request.user_nome}</p>
                   <p><strong>Experiência:</strong> {decisionDialog.request.experiencia_titulo}</p>
                   <p><strong>Valor:</strong> {formatCurrency(decisionDialog.request.valor)}</p>
-                  {decisionDialog.request.motivo_reembolso && (
-                    <p><strong>Motivo do usuário:</strong> {decisionDialog.request.motivo_reembolso}</p>
+                  {decisionDialog.request.motivo && (
+                    <p><strong>Motivo do usuário:</strong> {decisionDialog.request.motivo}</p>
                   )}
                 </div>
               </div>

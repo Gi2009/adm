@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Users, Phone, MapPin, User, Shield, Loader2, Calendar } from "lucide-react";
+import { Search, Users, Phone, MapPin, User, Shield, Loader2, Calendar, RefreshCw } from "lucide-react";
 
 interface UserProfile {
   id: string;
@@ -40,115 +40,33 @@ const UserRecords = () => {
     try {
       setLoading(true);
       
-      console.log('🔍 Iniciando busca de usuários...');
-      
-      // Teste simples primeiro
-      const { data: testData, error: testError } = await supabase
-        .from("profiles")
-        .select("count")
-        .single();
-
-      if (testError) {
-        console.error('❌ Erro no teste simples:', testError);
-      } else {
-        console.log('✅ Teste simples bem-sucedido:', testData);
-      }
-
-      // Buscar todos os perfis da tabela profiles
       const { data: profiles, error } = await supabase
         .from("profiles")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error("❌ Erro detalhado ao buscar perfis:", error);
-        console.log('Código do erro:', error.code);
-        console.log('Mensagem:', error.message);
-        console.log('Detalhes:', error.details);
-        console.log('Hint:', error.hint);
-        
-        // Dados mock baseados no seu SQL
-        const mockUsers: UserProfile[] = [
-          {
-            id: "0739e7ff-c83e-4e2c-9010-62af6d1a0e44",
-            user_id: "73068bb9-3f57-4152-9c1c-34e2b38a1f67",
-            nome: "Giovanna Oliveira",
-            telefone: "(11) 96312-4376",
-            type: "2",
-            local: null,
-            associação: null,
-            cpf: "54444444444",
-            created_at: "2025-09-03T20:22:43.931609+00:00",
-            updated_at: "2025-09-19T11:34:49.685372+00:00"
-          },
-          {
-            id: "bb254877-f550-4337-acc5-a068f4af5447",
-            user_id: "af0286f1-9882-4fc1-903e-d8d505f91fe2",
-            nome: "Kaua Guarani",
-            telefone: "2222222222",
-            type: "3",
-            local: null,
-            associação: null,
-            cpf: "11111111111",
-            created_at: "2025-09-10T12:51:41.601729+00:00",
-            updated_at: "2025-09-10T12:51:41.601729+00:00"
-          },
-          {
-            id: "f25829f3-44b5-423a-96a1-19471d24fe2d",
-            user_id: "b6489ae0-abad-4a03-8f8d-f27a5e4a6a8f",
-            nome: "Meraki",
-            telefone: "(11) 96472-4376",
-            type: "3",
-            local: null,
-            associação: null,
-            cpf: "55555555555",
-            created_at: "2025-08-31T21:20:05.04324+00:00",
-            updated_at: "2025-09-06T17:23:52.508006+00:00"
-          },
-          {
-            id: "fe735f62-42a3-4916-9b00-6544cacc22b8",
-            user_id: "963ecf83-0e94-41df-a874-238215bca8bb",
-            nome: "Agatha",
-            telefone: "(00) 00000-000",
-            type: "1",
-            local: null,
-            associação: null,
-            cpf: "44444444444",
-            created_at: "2025-09-07T17:57:17.766932+00:00",
-            updated_at: "2025-09-19T11:15:43.741589+00:00"
-          }
-        ];
-        
-        console.log("📋 Usando dados mock:", mockUsers);
-        setUsers(mockUsers);
+        console.error("Erro ao buscar perfis:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os usuários.",
+          variant: "destructive",
+        });
+        setUsers([]);
         return;
       }
 
-      console.log('✅ Perfis encontrados:', profiles?.length);
-      
-      // Garantir que todos os campos estejam preenchidos
-      const completeProfiles: UserProfile[] = (profiles || []).map(profile => ({
-        id: profile.id || "",
-        user_id: profile.user_id || "",
-        nome: profile.nome || null,
-        telefone: profile.telefone || null,
-        type: profile.type || null,
-        local: profile.local || null,
-        associação: profile.associação || null,
-        cpf: profile.cpf || null,
-        created_at: profile.created_at || new Date().toISOString(),
-        updated_at: profile.updated_at || new Date().toISOString()
-      }));
-      
-      setUsers(completeProfiles);
+      console.log("Usuários carregados:", profiles?.length);
+      setUsers(profiles || []);
       
     } catch (error: any) {
-      console.error("💥 Erro ao carregar usuários:", error);
+      console.error("Erro ao carregar usuários:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar os usuários. Verifique o console para mais detalhes.",
+        description: "Erro inesperado ao carregar usuários.",
         variant: "destructive",
       });
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -157,21 +75,18 @@ const UserRecords = () => {
   const filterUsers = () => {
     let filtered = users;
 
-    // Filtrar por tipo
     if (filterType !== "all") {
       filtered = filtered.filter(user => user.type === filterType);
     }
 
-    // Filtrar por termo de busca
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(user => 
-        (user.nome && user.nome.toLowerCase().includes(term)) ||
-        (user.telefone && user.telefone.includes(term)) ||
-        (user.local && user.local.toLowerCase().includes(term)) ||
-        (user.associação && user.associação.toLowerCase().includes(term)) ||
-        (user.cpf && user.cpf.includes(term)) ||
-        (user.user_id && user.user_id.toLowerCase().includes(term))
+        user.nome?.toLowerCase().includes(term) ||
+        user.telefone?.includes(term) ||
+        user.local?.toLowerCase().includes(term) ||
+        user.associação?.toLowerCase().includes(term) ||
+        user.cpf?.includes(term)
       );
     }
 
@@ -219,21 +134,28 @@ const UserRecords = () => {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center gap-2 mb-8">
-          <Users className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">Registro de Usuários</h1>
-          <Badge variant="secondary" className="ml-4">
-            {users.length} usuários
-          </Badge>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2">
+            <Users className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold text-foreground">Registro de Usuários</h1>
+            <Badge variant="secondary" className="ml-4">
+              {users.length} usuários
+            </Badge>
+          </div>
+          <Button onClick={fetchUsers} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Atualizar
+          </Button>
         </div>
+
 
         {/* Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           {[
-            { type: "all", label: "Total", count: users.length, color: "blue" },
-            { type: "1", label: "Turistas", count: users.filter(u => u.type === "1").length, color: "blue" },
-            { type: "2", label: "Donos", count: users.filter(u => u.type === "2").length, color: "green" },
-            { type: "3", label: "Admins", count: users.filter(u => u.type === "3").length, color: "red" }
+            { type: "all", label: "Total", count: users.length, color: "bg-blue-500" },
+            { type: "1", label: "Turistas", count: users.filter(u => u.type === "1").length, color: "bg-blue-500" },
+            { type: "2", label: "Donos", count: users.filter(u => u.type === "2").length, color: "bg-green-500" },
+            { type: "3", label: "Admins", count: users.filter(u => u.type === "3").length, color: "bg-red-500" }
           ].map((stat) => (
             <Card key={stat.type}>
               <CardContent className="p-4 flex items-center justify-between">
@@ -241,7 +163,7 @@ const UserRecords = () => {
                   <p className="text-sm text-muted-foreground">{stat.label}</p>
                   <p className="text-2xl font-bold">{stat.count}</p>
                 </div>
-                <div className={`w-3 h-3 rounded-full bg-${stat.color}-500`}></div>
+                <div className={`w-3 h-3 rounded-full ${stat.color}`}></div>
               </CardContent>
             </Card>
           ))}
@@ -302,11 +224,15 @@ const UserRecords = () => {
               <h3 className="text-lg font-semibold mb-2">
                 {users.length === 0 ? "Nenhum usuário encontrado" : "Nenhum resultado para a busca"}
               </h3>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mb-4">
                 {users.length === 0 
-                  ? "Ainda não há usuários cadastrados no sistema." 
+                  ? "Não há usuários cadastrados no sistema ou você não tem permissão para visualizá-los." 
                   : "Tente ajustar os filtros ou termos de busca."}
               </p>
+              <Button onClick={fetchUsers} variant="outline">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Tentar novamente
+              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -317,7 +243,7 @@ const UserRecords = () => {
                   <div className="flex items-start justify-between">
                     <div>
                       <CardTitle className="text-lg">
-                        {user.nome || "Nome não informado"}
+                        {user.nome}
                       </CardTitle>
                       <CardDescription>
                         Cadastrado em {formatDate(user.created_at)}
@@ -330,41 +256,30 @@ const UserRecords = () => {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   
-                  {user.telefone && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-foreground">{user.telefone}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-sm">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-foreground">{user.telefone}</span>
+                  </div>
                   
-                  {user.cpf && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-foreground">{user.cpf}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-sm">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-foreground">{user.cpf}</span>
+                  </div>
                   
-                  {user.local && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-foreground">{user.local}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-foreground">{user.local}</span>
+                  </div>
 
-                  {user.associação && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Shield className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-foreground">{user.associação}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-sm">
+                    <Shield className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-foreground">{user.associação}</span>
+                  </div>
 
                   <div className="pt-2 border-t text-xs text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-3 w-3" />
-                      <span>ID: {user.user_id}</span>
-                    </div>
-                    <div className="mt-1">
-                      <span>Tipo: {user.type}</span>
+                      <span>ID: {user.user_id.substring(0, 8)}...</span>
                     </div>
                   </div>
                 </CardContent>

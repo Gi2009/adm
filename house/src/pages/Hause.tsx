@@ -40,7 +40,7 @@ const Hause = () => {
       <Sidebar />
       <div className="flex-1 ml-64">
         <Routes>
-           <Route path="/" element={<GeralDashboard/>} />
+         {/* <Route path="/" element={<GeralDashboard/>} />*/}
           <Route path="/CandidatesDashboard" element={<CandidatesDashboard />} />
             <Route path="experience-approvals" element={<ExperiencesAnalysisDashboard />} />
             <Route path="user-records" element={<UserRecords />} />
