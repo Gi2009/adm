@@ -113,6 +113,12 @@ body {
   height: 100%;
 }
 
+.site-nav .nav-center a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .site-nav .icon {
   width: 44px;
   height: 44px;
@@ -247,6 +253,59 @@ img {
   width: 280px;
   margin-right: 20px;
   border-radius: 10px;
+}
+
+/* about image - MAIOR E À ESQUERDA COM TEXTO FLUINDO */
+.about-image-left {
+  width: 100%;
+  max-width: 550px;
+  height: auto;
+  border-radius: 12px;
+  margin: 0 30px 20px 0;
+  float: left;
+  box-shadow: 0 4px 15px var(--shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.about-image-left:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px var(--shadow);
+}
+
+/* Seção "Sobre Nós" com layout natural */
+.sobre-nos-section {
+  text-align: left;
+  display: block;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.sobre-nos-texto {
+  width: 100%;
+}
+
+.sobre-nos-section .subtitle {
+  text-align: left;
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+.sobre-nos-section .parágrafo {
+  text-align: justify;
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.team-intro-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-dark);
+  text-align: center;
+  margin-top: 50px;
+  margin-bottom: 10px;
+  clear: both;
 }
 
 /* Footer */
@@ -581,7 +640,118 @@ img {
   font-weight: 600;
 }
 
-/* ONG highlight/stats */
+/* ONG intro section - com imagem grande à esquerda */
+.ong-intro-section {
+  display: block;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.ong-intro-image {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  border-radius: 12px;
+  margin: 0 35px 25px 0;
+  float: left;
+  box-shadow: 0 4px 15px var(--shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.ong-intro-image:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px var(--shadow);
+}
+
+.ong-intro-texto {
+  width: 100%;
+}
+
+.ong-intro-section .título {
+  text-align: left;
+  font-size: 48px;
+  margin-bottom: 25px;
+}
+
+.ong-intro-section .parágrafo {
+  text-align: justify;
+  margin: 0 0 22px 0;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+/* ONG images gallery */
+.ong-images-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 25px;
+  margin: 50px auto;
+  max-width: 1200px;
+  padding: 0 20px;
+}
+
+.ong-gallery-image {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px var(--shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.ong-gallery-image:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px var(--shadow);
+}
+
+/* ONG values section - cards em grid */
+.ong-values-section {
+  display: block;
+  max-width: 1200px;
+  margin: 50px auto;
+  padding: 40px 20px;
+}
+
+.ong-values-section .subtitle {
+  text-align: center;
+  font-size: 36px;
+  margin-bottom: 40px;
+}
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.value-card {
+  background: var(--card-bg);
+  padding: 28px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px var(--shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.3s ease;
+}
+
+.value-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px var(--shadow);
+}
+
+.value-card h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+}
+
+.value-card p {
+  font-size: 16px;
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0;
+}
 .ong-highlight {
   background: linear-gradient(135deg, rgba(6,104,115,0.1), rgba(5,72,80,0.1));
   padding: 22px;
@@ -650,6 +820,37 @@ img {
 .ong-image:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 25px var(--shadow);
+}
+
+/* Project and activity images - COM ALTURA FIXA */
+.project-image,
+.activity-image {
+  width: 100%;
+  max-width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 15px 0;
+  box-shadow: 0 4px 15px var(--shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.project-image:hover,
+.activity-image:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px var(--shadow);
+}
+
+.activity-section {
+  margin: 30px 0;
+}
+
+.activity-section h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 15px;
+  margin-top: 20px;
 }
 
 /* CTA */
@@ -749,6 +950,65 @@ img {
   
   .stat-number {
     font-size: 1.5rem;
+  }
+  
+  .about-image-left {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 20px 0;
+    display: block;
+  }
+  
+  .sobre-nos-section .subtitle {
+    font-size: 24px;
+  }
+  
+  .sobre-nos-section .parágrafo {
+    text-align: left;
+    font-size: 16px;
+  }
+  
+  .team-intro-title {
+    font-size: 20px;
+    margin-top: 30px;
+  }
+  
+  .ong-intro-image {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 25px 0;
+    display: block;
+  }
+  
+  .ong-intro-section .título {
+    font-size: 32px;
+  }
+  
+  .ong-intro-section .parágrafo {
+    text-align: left;
+    font-size: 16px;
+  }
+  
+  .ong-images-gallery {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .ong-gallery-image {
+    height: 250px;
+  }
+  
+  .values-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .value-card {
+    padding: 22px;
+  }
+  
+  .ong-values-section .subtitle {
+    font-size: 28px;
   }
 }
 
