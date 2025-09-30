@@ -99,10 +99,8 @@ const CandidatesDashboard = () => {
     setProcessingId(candidate.id);
 
     try {
-      // Gerar token único
       const token = crypto.randomUUID();
 
-      // Procurar perfil existente por telefone (já que não temos email em profiles)
       const { data: existingProfiles } = await supabase
         .from('profiles')
         .select('user_id, type, nome, telefone, local, "associação"')
@@ -110,7 +108,6 @@ const CandidatesDashboard = () => {
       
       let userId = existingProfiles?.[0]?.user_id;
 
-      // Se existe perfil com mesmo telefone, atualizar informações e tipo
       if (userId && candidate.telefone) {
         const existingProfile = existingProfiles[0];
         const { error: updateProfileError } = await supabase
@@ -127,7 +124,6 @@ const CandidatesDashboard = () => {
         if (updateProfileError) throw updateProfileError;
       }
 
-      // Inserir na tabela de candidatos aprovados
       const { error: insertError } = await supabase
         .from('candidatos_aprovados')
         .insert({
@@ -139,7 +135,6 @@ const CandidatesDashboard = () => {
 
       if (insertError) throw insertError;
 
-      // Enviar email de aprovação
       const { error: emailError } = await supabase.functions.invoke('candidate-email', {
         body: {
           email: candidate.email,
@@ -151,7 +146,6 @@ const CandidatesDashboard = () => {
 
       if (emailError) throw emailError;
 
-      // Remover candidato da lista após aprovação
       const { error: deleteError } = await supabase
         .from('candidatos_oferec')
         .delete()
@@ -164,7 +158,6 @@ const CandidatesDashboard = () => {
         description: `Candidato ${candidate.nome} aprovado e email enviado. ${userId ? 'Perfil atualizado para tipo 2.' : 'Usuário poderá se registrar como tipo 2.'}`,
       });
 
-      // Atualizar lista
       fetchCandidates();
 
     } catch (error: any) {
@@ -192,7 +185,6 @@ const CandidatesDashboard = () => {
     setProcessingId(candidate.id);
 
     try {
-      // Enviar email de rejeição
       const { error: emailError } = await supabase.functions.invoke('candidate-email', {
         body: {
           email: candidate.email,
@@ -203,7 +195,6 @@ const CandidatesDashboard = () => {
 
       if (emailError) throw emailError;
 
-      // Remover candidato da lista
       const { error: deleteError } = await supabase
         .from('candidatos_oferec')
         .delete()
@@ -216,7 +207,6 @@ const CandidatesDashboard = () => {
         description: `${candidate.nome} foi rejeitado e email enviado.`,
       });
 
-      // Atualizar lista
       fetchCandidates();
 
     } catch (error: any) {
@@ -300,14 +290,12 @@ const CandidatesDashboard = () => {
                       <span className="text-foreground">{candidate.email}</span>
                     </div>
                   )}
-                  
                   {candidate.telefone && (
                     <div className="flex items-center gap-2 text-sm">
                       <Phone className="h-4 w-4 text-muted-foreground" />
                       <span className="text-foreground">{candidate.telefone}</span>
                     </div>
                   )}
-                  
                   {(candidate.endereco || candidate.municipio) && (
                     <div className="flex items-center gap-2 text-sm">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -318,35 +306,30 @@ const CandidatesDashboard = () => {
                       </span>
                     </div>
                   )}
-
                   {candidate.idade && (
                     <div className="text-sm">
                       <span className="text-muted-foreground">Idade: </span>
                       <span className="text-foreground">{candidate.idade}</span>
                     </div>
                   )}
-
                   {candidate.comunidade && (
                     <div className="text-sm">
                       <span className="text-muted-foreground">Comunidade: </span>
                       <span className="text-foreground">{candidate.comunidade}</span>
                     </div>
                   )}
-
                   {candidate.associacao && (
                     <div className="text-sm">
                       <span className="text-muted-foreground">Associação: </span>
                       <span className="text-foreground">{candidate.associacao}</span>
                     </div>
                   )}
-
                   {candidate.cont_asso && (
                     <div className="text-sm">
                       <span className="text-muted-foreground">Contato Associação: </span>
                       <span className="text-foreground">{candidate.cont_asso}</span>
                     </div>
                   )}
-
                   {candidate.exp_prevista && (
                     <div className="text-sm">
                       <span className="text-muted-foreground">Experiência Prevista: </span>
