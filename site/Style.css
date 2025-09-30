@@ -40,9 +40,9 @@ body.dark-mode {
   --primary:#054850;
   --primary-dark:#043840;
   --accent:#5a9d8a;
-  --muted:#b8c5d6;
+  --muted:#a1c2ed;
   --text:#d4e8ed;
-  --bg:#0a1f23;
+  --bg:#d4e8ed;
   --card-bg:#122a2f;
   --shadow:rgba(0,0,0,0.3);
 }
