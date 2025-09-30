@@ -45,6 +45,8 @@ body.dark-mode {
   --bg:#0a1f23;
   --card-bg:#122a2f;
   --shadow:rgba(0,0,0,0.3);
+  --highlight:#7dd3c0;
+  --link-color:#6bc4b8;
 }
 
 body {
@@ -206,6 +208,10 @@ body {
   margin-bottom: 10px;
 }
 
+body.dark-mode .subtitle {
+  color: var(--highlight);
+}
+
 .parágrafo {
   font-size: 18px;
   color: var(--text);
@@ -279,6 +285,10 @@ img {
   color: var(--muted);
 }
 
+body.dark-mode .menu-footer-title {
+  color: var(--highlight);
+}
+
 .link-menu {
   display: flex;
   gap: 15px;
@@ -306,6 +316,10 @@ img {
   transition: fill 0.25s ease;
 }
 
+body.dark-mode .footer-icons .icon {
+  fill: var(--highlight);
+}
+
 .footer-icons:hover {
   background-color: rgba(255,255,255,0.12);
   transform: translateY(-3px);
@@ -322,6 +336,10 @@ img {
   margin: 10px 0;
 }
 
+body.dark-mode .info-footer {
+  color: var(--highlight);
+}
+
 .google-play-icon {
   width: 140px;
   border-radius: 8px;
@@ -334,11 +352,14 @@ img {
 
 /* Footer Copyright */
 .footer-copyright {
-  background-color: rgba(0,0,0,0.15);
-  padding: 15px 0;
+  background-color: rgba(0,0,0,0.25);
+  padding: 15px 20px;
   text-align: center;
   border-top: 1px solid rgba(255,255,255,0.1);
   margin-top: 20px;
+  margin-left: -20px;
+  margin-right: -20px;
+  width: calc(100% + 40px);
 }
 
 .footer-copyright p {
@@ -346,6 +367,10 @@ img {
   font-size: 0.9rem;
   margin: 0;
   font-style: italic;
+}
+
+body.dark-mode .footer-copyright p {
+  color: var(--highlight);
 }
 
 /* Carousel - CARDS DO MESMO TAMANHO */
@@ -409,6 +434,10 @@ img {
   line-height: 1.15;
 }
 
+body.dark-mode .carousel-title {
+  color: var(--highlight);
+}
+
 .carousel-description {
   font-size: 0.95rem;
   color: var(--text);
@@ -428,6 +457,10 @@ img {
   font-weight: 700;
   color: var(--primary);
   margin-top: auto;
+}
+
+body.dark-mode .carousel-price {
+  color: var(--highlight);
 }
 
 /* carousel controls */
@@ -507,6 +540,10 @@ img {
   line-height: 1.05;
 }
 
+body.dark-mode .team-member-name {
+  color: var(--highlight);
+}
+
 .team-member-role {
   font-size: 0.9rem;
   color: var(--primary);
@@ -517,6 +554,10 @@ img {
   -webkit-line-clamp: 3;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+body.dark-mode .team-member-role {
+  color: var(--link-color);
 }
 
 /* LGPD / cards */
@@ -541,12 +582,20 @@ img {
   font-weight: 700;
 }
 
+body.dark-mode .lgpd-section h2 {
+  color: var(--highlight);
+}
+
 .lgpd-section h3 {
   font-size: 1.1rem;
   color: var(--primary);
   margin-bottom: 8px;
   margin-top: 15px;
   font-weight: 600;
+}
+
+body.dark-mode .lgpd-section h3 {
+  color: var(--highlight);
 }
 
 .lgpd-section ul {
@@ -564,6 +613,15 @@ img {
   color: var(--text);
 }
 
+.lgpd-section strong {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+body.dark-mode .lgpd-section strong {
+  color: var(--highlight);
+}
+
 .lgpd-contact {
   background: linear-gradient(135deg, rgba(6,104,115,0.1), rgba(5,72,80,0.1));
   padding: 20px;
@@ -571,9 +629,24 @@ img {
   border-left: 4px solid var(--primary);
 }
 
+.lgpd-contact h2 {
+  font-size: 1.4rem;
+  color: var(--text);
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+body.dark-mode .lgpd-contact h2 {
+  color: var(--highlight);
+}
+
 .lgpd-contact a {
   color: var(--primary);
   font-weight: 600;
+}
+
+body.dark-mode .lgpd-contact a {
+  color: var(--link-color);
 }
 
 /* ONG highlight/stats */
@@ -615,6 +688,10 @@ img {
   color: var(--primary);
   display: block;
   margin-bottom: 5px;
+}
+
+body.dark-mode .stat-number {
+  color: var(--highlight);
 }
 
 .stat-label {
@@ -744,6 +821,11 @@ img {
   
   .stat-number {
     font-size: 1.5rem;
+  }
+  
+  .footer-copyright {
+    margin-left: -20px;
+    margin-right: -20px;
   }
 }
 
