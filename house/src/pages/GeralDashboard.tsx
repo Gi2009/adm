@@ -48,10 +48,10 @@ const GeralDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Painel Administrativo</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200">
+      <div className="container mx-auto px-4 py-12 text-center">
+        <div className="flex flex-col items-center gap-6 mb-12">
+          <h1 className="text-4xl font-bold">Painel Administrativo</h1>
           <Button
             variant="outline"
             onClick={async () => {
@@ -65,10 +65,10 @@ const GeralDashboard = () => {
         </div>
 
         {isAdmin && (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 justify-center">
+            <Card className="shadow-lg">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-center gap-2">
                   <CardTitle>Candidatos</CardTitle>
                   <Users className="h-5 w-5 text-primary" />
                 </div>
@@ -81,9 +81,9 @@ const GeralDashboard = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-lg">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-center gap-2">
                   <CardTitle>Experiências</CardTitle>
                   <Map className="h-5 w-5 text-primary" />
                 </div>
@@ -98,7 +98,7 @@ const GeralDashboard = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle>Status</CardTitle>
                 <CardDescription>Informações gerais do sistema</CardDescription>
