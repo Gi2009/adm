@@ -147,7 +147,7 @@ const CandidateRegistration = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-yellow-50 via-white to-yellow-100">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -155,7 +155,7 @@ const CandidateRegistration = () => {
 
   if (!token || !tokenValid) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-yellow-50 via-white to-yellow-100 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <XCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
@@ -181,7 +181,7 @@ const CandidateRegistration = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-yellow-50 via-white to-yellow-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
