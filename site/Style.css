@@ -37,11 +37,11 @@ footer, header, hgroup, menu, nav, section {
 }
 
 body.dark-mode {
-  --primary:#043840;
-  --primary-dark:#032830;
+  --primary:#054850;
+  --primary-dark:#043840;
   --accent:#5a9d8a;
-  --muted:#b8c5d6;
-  --text:#e8f0f2;
+  --muted:#d3e2f1;
+  --text:#f5f9fa;
   --bg:#0a1f23;
   --card-bg:#122a2f;
   --shadow:rgba(0,0,0,0.3);
