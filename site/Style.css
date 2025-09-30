@@ -40,12 +40,13 @@ body.dark-mode {
   --primary:#054850;
   --primary-dark:#043840;
   --accent:#5a9d8a;
-  --muted:#a1c2ed;
+  --muted:#b8c5d6;
   --text:#d4e8ed;
-  --bg:#d4e8ed;
+  --bg:#0a1f23;
   --card-bg:#122a2f;
   --shadow:rgba(0,0,0,0.3);
 }
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -205,10 +206,6 @@ body {
   margin-bottom: 10px;
 }
 
-body.dark-mode .subtitle {
-  color: var(--highlight);
-}
-
 .parágrafo {
   font-size: 18px;
   color: var(--text);
@@ -282,10 +279,6 @@ img {
   color: var(--muted);
 }
 
-body.dark-mode .menu-footer-title {
-  color: var(--highlight);
-}
-
 .link-menu {
   display: flex;
   gap: 15px;
@@ -309,12 +302,8 @@ body.dark-mode .menu-footer-title {
 .footer-icons .icon {
   width: 22px;
   height: 22px;
-  fill: var(--muted);
+  fill: #ffffff;
   transition: fill 0.25s ease;
-}
-
-body.dark-mode .footer-icons .icon {
-  fill: var(--highlight);
 }
 
 .footer-icons:hover {
@@ -333,10 +322,6 @@ body.dark-mode .footer-icons .icon {
   margin: 10px 0;
 }
 
-body.dark-mode .info-footer {
-  color: var(--highlight);
-}
-
 .google-play-icon {
   width: 140px;
   border-radius: 8px;
@@ -349,14 +334,11 @@ body.dark-mode .info-footer {
 
 /* Footer Copyright */
 .footer-copyright {
-  background-color: rgba(0,0,0,0.25);
-  padding: 15px 20px;
+  background-color: rgba(0,0,0,0.15);
+  padding: 15px 0;
   text-align: center;
   border-top: 1px solid rgba(255,255,255,0.1);
   margin-top: 20px;
-  margin-left: -20px;
-  margin-right: -20px;
-  width: calc(100% + 40px);
 }
 
 .footer-copyright p {
@@ -364,10 +346,6 @@ body.dark-mode .info-footer {
   font-size: 0.9rem;
   margin: 0;
   font-style: italic;
-}
-
-body.dark-mode .footer-copyright p {
-  color: var(--highlight);
 }
 
 /* Carousel - CARDS DO MESMO TAMANHO */
@@ -431,10 +409,6 @@ body.dark-mode .footer-copyright p {
   line-height: 1.15;
 }
 
-body.dark-mode .carousel-title {
-  color: var(--highlight);
-}
-
 .carousel-description {
   font-size: 0.95rem;
   color: var(--text);
@@ -454,10 +428,6 @@ body.dark-mode .carousel-title {
   font-weight: 700;
   color: var(--primary);
   margin-top: auto;
-}
-
-body.dark-mode .carousel-price {
-  color: var(--highlight);
 }
 
 /* carousel controls */
@@ -537,10 +507,6 @@ body.dark-mode .carousel-price {
   line-height: 1.05;
 }
 
-body.dark-mode .team-member-name {
-  color: var(--highlight);
-}
-
 .team-member-role {
   font-size: 0.9rem;
   color: var(--primary);
@@ -551,10 +517,6 @@ body.dark-mode .team-member-name {
   -webkit-line-clamp: 3;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-body.dark-mode .team-member-role {
-  color: var(--link-color);
 }
 
 /* LGPD / cards */
@@ -579,20 +541,12 @@ body.dark-mode .team-member-role {
   font-weight: 700;
 }
 
-body.dark-mode .lgpd-section h2 {
-  color: var(--highlight);
-}
-
 .lgpd-section h3 {
   font-size: 1.1rem;
   color: var(--primary);
   margin-bottom: 8px;
   margin-top: 15px;
   font-weight: 600;
-}
-
-body.dark-mode .lgpd-section h3 {
-  color: var(--highlight);
 }
 
 .lgpd-section ul {
@@ -610,15 +564,6 @@ body.dark-mode .lgpd-section h3 {
   color: var(--text);
 }
 
-.lgpd-section strong {
-  color: var(--primary);
-  font-weight: 600;
-}
-
-body.dark-mode .lgpd-section strong {
-  color: var(--highlight);
-}
-
 .lgpd-contact {
   background: linear-gradient(135deg, rgba(6,104,115,0.1), rgba(5,72,80,0.1));
   padding: 20px;
@@ -626,24 +571,9 @@ body.dark-mode .lgpd-section strong {
   border-left: 4px solid var(--primary);
 }
 
-.lgpd-contact h2 {
-  font-size: 1.4rem;
-  color: var(--text);
-  margin-bottom: 10px;
-  font-weight: 700;
-}
-
-body.dark-mode .lgpd-contact h2 {
-  color: var(--highlight);
-}
-
 .lgpd-contact a {
   color: var(--primary);
   font-weight: 600;
-}
-
-body.dark-mode .lgpd-contact a {
-  color: var(--link-color);
 }
 
 /* ONG highlight/stats */
@@ -685,10 +615,6 @@ body.dark-mode .lgpd-contact a {
   color: var(--primary);
   display: block;
   margin-bottom: 5px;
-}
-
-body.dark-mode .stat-number {
-  color: var(--highlight);
 }
 
 .stat-label {
@@ -818,11 +744,6 @@ body.dark-mode .stat-number {
   
   .stat-number {
     font-size: 1.5rem;
-  }
-  
-  .footer-copyright {
-    margin-left: -20px;
-    margin-right: -20px;
   }
 }
 
