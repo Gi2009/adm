@@ -37,11 +37,11 @@ footer, header, hgroup, menu, nav, section {
 }
 
 body.dark-mode {
-  --primary:#066873;
-  --primary-dark:#054850;
+  --primary:#054850;
+  --primary-dark:#539fab;
   --accent:#5a9d8a;
   --muted:#b8c5d6;
-  --text:#c8e3ea;
+  --text:#e8f0f2;
   --bg:#0a1f23;
   --card-bg:#122a2f;
   --shadow:rgba(0,0,0,0.3);
@@ -302,7 +302,7 @@ img {
 .footer-icons .icon {
   width: 22px;
   height: 22px;
-  fill: #ffffff;
+  fill: var(--muted);
   transition: fill 0.25s ease;
 }
 
