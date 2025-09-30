@@ -475,8 +475,8 @@ const handleRefund = async () => {
               </div>
               <ul className="text-yellow-700 text-xs mt-1 space-y-1 list-disc list-inside">
                 <li>Reembolsos são avaliados em até 5 dias úteis</li>
-                <li>O valor será devolvido pelo mesmo método de pagamento</li>
-                <li>Após a análise, você receberá um e-mail com o resultado</li>
+                <li>Adicione a conta no qual irá receber o reembolso</li>
+                <li>Adicione email e telefone para contato</li>
               </ul>
             </div>
           </div>

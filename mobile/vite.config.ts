@@ -8,6 +8,11 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+
+    allowedHosts: [
+      'chubler-jonathan-unserenely.ngrok-free.dev',
+      '.ngrok-free.dev' // Permite todos os subdomínios ngrok
+    ]
   },
   plugins: [
     react(),

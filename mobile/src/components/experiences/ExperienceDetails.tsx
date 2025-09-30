@@ -20,6 +20,8 @@ declare global {
   }
 }
 
+
+
 interface Experience {
   id: number;
   titulo: string;
@@ -51,6 +53,21 @@ const formatDate = (dateString: string) => {
     day: 'numeric'
   });
 };
+
+const getApiBaseUrl = () => {
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:3000/api';
+  }
+  
+  if (window.location.hostname.includes('ngrok-free.dev')) {
+    return 'https://chubler-jonathan-unserenely.ngrok-free.dev/api';
+  }
+  
+  // Para IP local (celular na mesma rede)
+  return 'http://192.168.1.7:3000/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = false }: ExperienceDetailsProps) => {
   const [paypalLoaded, setPaypalLoaded] = useState(false);
@@ -168,7 +185,7 @@ const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = fa
 
           console.log('Criando ordem para:', experience.id, 'Quantidade:', ticketQuantity, 'Total:', totalAmount);
           
-          const response = await fetch('http://localhost:3000/api/create-paypal-order', {
+           const response = await fetch(`${API_BASE_URL}/create-paypal-order`, {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
@@ -330,7 +347,7 @@ const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = fa
                 </div>
                 <p className="text-green-600 mt-2">
                   {ticketQuantity} {ticketQuantity === 1 ? 'ingresso' : 'ingressos'} comprado(s) com sucesso. 
-                  Você receberá um e-mail com os detalhes.
+                  Obrigada por naveguar conosco.
                 </p>
                 {selectedDate && (
                   <p className="text-green-600 mt-1">
