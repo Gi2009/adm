@@ -156,40 +156,40 @@ const ExperiencesAnalysisDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-yellow-50 via-white to-yellow-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-green-700">Carregando experiências...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto mb-4"></div>
+          <p className="text-yellow-700">Carregando experiências...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-100">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-yellow-50 via-white to-yellow-100 flex flex-col items-center justify-start py-8">
+      <div className="w-full max-w-7xl px-4">
         <div className="flex items-center gap-4 mb-8">
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
-            className="p-2 text-green-700 hover:bg-green-100"
+            className="p-2 text-yellow-700 hover:bg-yellow-100"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-green-800">
+            <h1 className="text-3xl font-bold text-yellow-800">
               Dashboard de Análise de Experiências
             </h1>
-            <p className="text-green-600 mt-2">
+            <p className="text-yellow-600 mt-2">
               Analise e aprove experiências submetidas pelos usuários
             </p>
           </div>
         </div>
 
         {experiences.length === 0 ? (
-          <Card className="border border-green-200">
+          <Card className="border border-yellow-200">
             <CardContent className="text-center py-12">
-              <p className="text-green-600 text-lg">
+              <p className="text-yellow-600 text-lg">
                 Não há experiências pendentes de análise.
               </p>
             </CardContent>
@@ -199,10 +199,10 @@ const ExperiencesAnalysisDashboard = () => {
             {experiences.map((experience) => (
               <Card 
                 key={experience.id} 
-                className="overflow-hidden border border-green-200 shadow-sm hover:shadow-lg transition"
+                className="overflow-hidden border border-yellow-200 shadow-sm hover:shadow-lg transition"
               >
                 {experience.img && (
-                  <div className="aspect-video bg-green-50">
+                  <div className="aspect-video bg-yellow-50">
                     <img
                       src={experience.img}
                       alt={experience.titulo}
@@ -213,40 +213,40 @@ const ExperiencesAnalysisDashboard = () => {
                 
                 <CardHeader>
                   <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-lg text-green-800">{experience.titulo}</CardTitle>
-                    <Badge className="bg-green-100 text-green-700">
+                    <CardTitle className="text-lg text-yellow-800">{experience.titulo}</CardTitle>
+                    <Badge className="bg-yellow-100 text-yellow-700">
                       {getTypeLabel(experience.tipo)}
                     </Badge>
                   </div>
-                  <CardDescription className="line-clamp-2 text-green-600">
+                  <CardDescription className="line-clamp-2 text-yellow-600">
                     {experience.descricao}
                   </CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm text-green-700">
+                  <div className="grid grid-cols-2 gap-4 text-sm text-yellow-700">
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-green-500" />
+                      <MapPin className="h-4 w-4 text-yellow-500" />
                       <span className="truncate">{experience.local}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-green-500" />
+                      <DollarSign className="h-4 w-4 text-yellow-500" />
                       <span>R$ {experience.preco?.toFixed(2)}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-green-500" />
+                      <Users className="h-4 w-4 text-yellow-500" />
                       <span>{experience.quantas_p} pessoas</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-green-500" />
+                      <Clock className="h-4 w-4 text-yellow-500" />
                       <span className="truncate">{experience.data_experiencia}</span>
                     </div>
                   </div>
 
                   {experience.incluso && (
                     <div>
-                      <h4 className="font-medium text-sm text-green-800 mb-1">Incluso:</h4>
-                      <p className="text-sm text-green-600 line-clamp-2">
+                      <h4 className="font-medium text-sm text-yellow-800 mb-1">Incluso:</h4>
+                      <p className="text-sm text-yellow-600 line-clamp-2">
                         {experience.incluso}
                       </p>
                     </div>
@@ -255,7 +255,7 @@ const ExperiencesAnalysisDashboard = () => {
                   <div className="flex gap-2 pt-4">
                     <Button
                       onClick={() => approveExperience(experience)}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                      className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white"
                       size="sm"
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
