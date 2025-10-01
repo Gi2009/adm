@@ -222,10 +222,8 @@ const ExperiencesApproved = () => {
         {/* Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           {[
-            { type: "all", label: "Total", count: experiences.length, color: "blue" },
-            { type: 1, label: "Praia", count: experiences.filter(e => e.tipo === 1).length, color: "blue" },
-            { type: 2, label: "Trilha", count: experiences.filter(e => e.tipo === 2).length, color: "green" },
-            { type: 3, label: "Cultura", count: experiences.filter(e => e.tipo === 3).length, color: "purple" }
+            { type: "all", label: "Total", count: experiences.length, color: "blue" }
+           
           ].map((stat) => (
             <Card key={stat.type}>
               <CardContent className="p-4 flex items-center justify-between">
@@ -252,36 +250,7 @@ const ExperiencesApproved = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <div className="flex gap-2 flex-wrap">
-                <Button
-                  variant={filterType === "all" ? "default" : "outline"}
-                  onClick={() => setFilterType("all")}
-                  size="sm"
-                >
-                  Todas
-                </Button>
-                <Button
-                  variant={filterType === 1 ? "default" : "outline"}
-                  onClick={() => setFilterType(1)}
-                  size="sm"
-                >
-                  Praia
-                </Button>
-                <Button
-                  variant={filterType === 2 ? "secondary" : "outline"}
-                  onClick={() => setFilterType(2)}
-                  size="sm"
-                >
-                  Trilha
-                </Button>
-                <Button
-                  variant={filterType === 3 ? "destructive" : "outline"}
-                  onClick={() => setFilterType(3)}
-                  size="sm"
-                >
-                  Cultura
-                </Button>
-              </div>
+             
             </div>
           </CardContent>
         </Card>

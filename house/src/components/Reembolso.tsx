@@ -580,8 +580,8 @@ const RefundManagement = () => {
             </DialogTitle>
             <DialogDescription>
               {decisionDialog.decision === 'approve' 
-                ? "Você está prestes a aprovar o reembolso desta compra. O valor será devolvido ao usuário."
-                : "Você está prestes a rejeitar o pedido de reembolso. A compra permanecerá confirmada."
+                ? "Você está prestes a aprovar o reembolso."
+                : "Você está prestes a rejeitar o reembolso. A compra permanecerá confirmada."
               }
             </DialogDescription>
           </DialogHeader>

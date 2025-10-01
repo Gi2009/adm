@@ -293,7 +293,7 @@ const ComprasExperiencias = () => {
                 <h3 className="font-semibold">Diagnóstico</h3>
                 <p className="text-sm text-muted-foreground">
                   {compras.length === 0 
-                    ? "Nenhuma compra encontrada. Verifique as políticas RLS." 
+                    ? "Nenhuma compra encontrada." 
                     : `${compras.length} compras carregadas com sucesso.`}
                 </p>
               </div>
@@ -303,7 +303,7 @@ const ComprasExperiencias = () => {
                   variant="outline"
                   size="sm"
                 >
-                  Testar Conexão
+                  
                 </Button>
                 <Button
                   onClick={fetchCompras}
@@ -499,14 +499,13 @@ const ComprasExperiencias = () => {
               <ShoppingCart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Nenhuma compra encontrada</h3>
               <p className="text-muted-foreground mb-4">
-                Não há compras registradas no sistema ou você não tem permissão para visualizá-las.
+                Não há compras de experiencias.
               </p>
               <div className="space-y-2 text-sm text-left max-w-md mx-auto">
-                <p>📋 Possíveis causas:</p>
+                
                 <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                  <li>Não há compras no banco de dados</li>
-                  <li>Políticas RLS estão bloqueando o acesso</li>
-                  <li>O usuário logado não tem permissão de administrador</li>
+             
+               
                 </ul>
               </div>
             </CardContent>
