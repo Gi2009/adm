@@ -444,13 +444,28 @@ body.dark-mode .dark-mode-toggle .moon-icon {
   width: 100%;
 }
 
+.hero-section {
+  clear: both;
+}
+
 .section-image-float {
   float: left;
-  width: 260px;
+  width: 300px;
+  max-width: 40%;
   margin: 0 var(--spacing-xl) var(--spacing-lg) 0;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   shape-outside: margin-box; 
+}
+
+.section-image-float-right {
+  float: right;
+  width: 300px;
+  max-width: 40%;
+  margin: 0 0 var(--spacing-lg) var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  shape-outside: margin-box;
 }
 
 .about-image-large {
@@ -470,6 +485,7 @@ body.dark-mode .dark-mode-toggle .moon-icon {
 
 .about-section {
   display: block;
+  clear: both;
 }
 
 .about-text {
@@ -490,7 +506,6 @@ body.dark-mode .dark-mode-toggle .moon-icon {
   list-style: none;
   padding-left: 0;
   margin: var(--spacing-lg) 0;
-  clear: both; 
 }
 
 .feature-list li {
@@ -1090,7 +1105,7 @@ body.dark-mode .dark-mode-toggle .moon-icon {
   }
   
   .section-image-float,
-  .about-image-large {
+  .section-image-float-right {
     max-width: 400px;
   }
 }
@@ -1169,6 +1184,7 @@ body.dark-mode .dark-mode-toggle .moon-icon {
   }
   
   .section-image-float,
+  .section-image-float-right,
   .about-image-large {
     float: none;
     max-width: 100%;
@@ -1283,6 +1299,7 @@ body.dark-mode .dark-mode-toggle .moon-icon {
     font-size: 0.95rem;
   }
 }
+
 /* ============================================================================
    17. PRINT STYLES
    ============================================================================ */
