@@ -64,7 +64,7 @@ export const ForgotPassword = ({ onBack }: ForgotPasswordProps) => {
   if (emailSent) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/20 flex items-center justify-center p-4">
-        {/* Background decorativo */}
+
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute top-10 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-10 w-48 h-48 bg-accent/15 rounded-full blur-3xl"></div>
@@ -73,7 +73,7 @@ export const ForgotPassword = ({ onBack }: ForgotPasswordProps) => {
 
         <Card className="w-full max-w-md relative bg-card/90 backdrop-blur-sm border-border/50 shadow-[var(--shadow-ocean)]">
           <div className="p-6 space-y-6 text-center">
-            {/* Success Icon */}
+ 
             <div className="flex items-center justify-center mb-4">
               <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
                 <Mail className="w-8 h-8 text-primary-foreground" />
@@ -106,7 +106,7 @@ export const ForgotPassword = ({ onBack }: ForgotPasswordProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/20 flex items-center justify-center p-4">
-      {/* Background decorativo */}
+
       <div className="fixed inset-0 overflow-hidden">
         <div className="absolute top-10 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-10 w-48 h-48 bg-accent/15 rounded-full blur-3xl"></div>
@@ -115,7 +115,7 @@ export const ForgotPassword = ({ onBack }: ForgotPasswordProps) => {
 
       <Card className="w-full max-w-md relative bg-card/90 backdrop-blur-sm border-border/50 shadow-[var(--shadow-ocean)]">
         <div className="p-6 space-y-6">
-          {/* Header */}
+        
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center mb-4">
               <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
@@ -130,7 +130,7 @@ export const ForgotPassword = ({ onBack }: ForgotPasswordProps) => {
             </p>
           </div>
 
-          {/* Form */}
+   
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">
@@ -159,7 +159,7 @@ export const ForgotPassword = ({ onBack }: ForgotPasswordProps) => {
             </Button>
           </form>
 
-          {/* Back to login */}
+
           <div className="text-center">
             <button
               onClick={onBack}
