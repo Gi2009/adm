@@ -64,7 +64,7 @@ const Onboarding = ({ onContinue }: OnboardingProps) => {
               </span>
               <span className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-accent rounded-full"></div>
-                Turismo responsável
+                Visita responsável
               </span>
               <span className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-secondary rounded-full"></div>
