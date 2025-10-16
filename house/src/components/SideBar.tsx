@@ -29,7 +29,7 @@ const Sidebar = () => {
         <div className="flex items-center space-x-2">
           <Menu className="h-6 w-6 text-sidebar-primary" />
           <span className="text-lg font-semibold text-sidebar-foreground">
-            Turismo Admin
+            KANOA Admin
           </span>
         </div>
       </div>
