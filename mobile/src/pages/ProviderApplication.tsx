@@ -136,7 +136,7 @@ export const ProviderApplication = () => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="no" id="no" />
-                    <Label htmlFor="no">Não, mas tenho experiência com turismo sustentável</Label>
+                    <Label htmlFor="no">Não, mas tenho experiência com visita sustentável</Label>
                   </div>
                 </RadioGroup>
               </div>
@@ -158,10 +158,10 @@ export const ProviderApplication = () => {
 
               {formData.isCommunityMember === "yes" && (
                 <div className="space-y-2">
-                  <Label htmlFor="experience">Experiência com Turismo</Label>
+                  <Label htmlFor="experience">Experiência com visitas</Label>
                   <Textarea
                     id="experience"
-                    placeholder="Descreva sua experiência com turismo sustentável e atividades locais..."
+                    placeholder="Descreva sua experiência com visita sustentável e atividades locais..."
                     value={formData.experience}
                     onChange={(e) => 
                       setFormData({...formData, experience: e.target.value})
