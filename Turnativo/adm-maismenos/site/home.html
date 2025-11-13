@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>KANOA - Conexão com Povos do Mar</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+
+<header>
+  <nav class="site-nav" role="navigation" aria-label="Menu principal">
+    <div class="nav-left">
+      <a href="javascript:history.back()" aria-label="Voltar" class="back-button">
+        <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="#FFFFFF">
+          <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/>
+        </svg>
+      </a>
+      
+      <button id="dark-mode-toggle" class="dark-mode-toggle" aria-label="Alternar modo escuro">
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 17.5C9.5 17.5 7.5 15.5 7.5 13S9.5 8.5 12 8.5 16.5 10.5 16.5 13 14.5 17.5 12 17.5M12 7C8.7 7 6 9.7 6 13S8.7 19 12 19 18 16.3 18 13 15.3 7 12 7M12 2L14.4 5.7 18.7 4.3 18 8.7 22 11 18 13.3 18.7 17.7 14.4 16.3 12 20 9.6 16.3 5.3 17.7 6 13.3 2 11 6 8.7 5.3 4.3 9.6 5.7 12 2Z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="nav-center">
+      <a href="home.html">
+        <img src="icon.svg" alt="Kanoa - Voltar para home" class="icon">
+      </a>
+    </div>
+
+    <ul class="nav-right" role="menubar" aria-hidden="false">
+      <li><a href="home.html">Home</a></li>
+      <li><a href="LGPD.html">LGPD</a></li>
+      <li><a href="ONG.html">PermaMar</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <img id="imagem-banner" class="imagem-banner" src="Banner.png" alt="Banner do Kanoa">
+
+  <section class="secao" id="hero">
+    <img src="Kanoa.png" alt="Kanoa - logo e imagem" class="left-img">
+    <div class="texto">
+      <h1 class="título">Kanoa</h1>
+
+      <p class="parágrafo">Antigo Caiçara Guide, o KANOA é um HUB de inovação social que conecta visitantes, escolas e empresas às comunidades tradicionais da Biorregião Costa Verde.
+      Mais do que um aplicativo, o KANOA é uma infraestrutura de conexão e curadoria, que fortalece a identidade do território, valoriza saberes ancestrais, gera renda justa e promove a regeneração dos ecossistemas costeiros em parceria com os Povos do Mar.</p>
+
+      <h2 class="subtitle">Para quem é</h2>
+      <ul>
+        <li>Comunidades e coletivos: visibilidade, apoio metodológico e rede de parceiros.</li>
+        <li>Escolas e universidades: vivências, projetos de extensão e pesquisa aplicada.</li>
+        <li>Empresas: engajamento ESG, educação corporativa e jornadas de voluntariado responsável.</li>
+        <li>Visitantes conscientes: participação em experiências com impacto local positivo.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="secao" id="experiencias-intro">
+    <div class="texto">
+      <h2 class="titulo subtitle">Experiências</h2>
+      <p class="parágrafo">Descubra experiências únicas que conectam você com a natureza e a cultura tradicional dos Povos do Mar. Cada vivência é cuidadosamente planejada para proporcionar aprendizado autêntico e impacto positivo na comunidade local.</p>
+    </div>
+  </section>
+
+  <!-- Carousel de Experiências -->
+  <div class="carousel-container experiences-carousel" aria-roledescription="carousel" tabindex="0">
+    <div class="carousel-wrapper">
+      <div class="carousel">
+        <div class="carousel-item">
+          <img src="trilha_manguezal.jpg" alt="Trilha no Manguezal">
+          <div class="carousel-content">
+            <div class="carousel-title">Trilha no Manguezal</div>
+            <div class="carousel-description">Explore os manguezais com guias locais e descubra a importância deste ecossistema para a vida marinha.</div>
+            <div class="carousel-price">R$ 80,00</div>
+          </div>
+        </div>
+
+        <div class="carousel-item">
+          <img src="culinária.jpg" alt="Culinária de Campo">
+          <div class="carousel-content">
+            <div class="carousel-title">Culinária de Campo</div>
+            <div class="carousel-description">Aprenda a preparar pratos tradicionais com ingredientes frescos locais.</div>
+            <div class="carousel-price">R$ 95,00</div>
+          </div>
+        </div>
+
+        <div class="carousel-item">
+          <img src="canoa.webp" alt="Remada de Canoa Caiçara">
+          <div class="carousel-content">
+            <div class="carousel-title">Canoa Caiçara</div>
+            <div class="carousel-description">Navegue em canoas tradicionais caiçaras e conecte-se com as águas da Costa Verde.</div>
+            <div class="carousel-price">R$ 70,00</div>
+          </div>
+        </div>
+
+        <div class="carousel-item">
+          <img src="artesanato.webp" alt="Oficina de Artesanato">
+          <div class="carousel-content">
+            <div class="carousel-title">Artesanato Natural</div>
+            <div class="carousel-description">Crie peças únicas usando materiais naturais e técnicas tradicionais.</div>
+            <div class="carousel-price">R$ 65,00</div>
+          </div>
+        </div>
+
+        <div class="carousel-item">
+          <img src="roda.jpg" alt="Roda de Cultura Caiçara">
+          <div class="carousel-content">
+            <div class="carousel-title">Roda de Cultura</div>
+            <div class="carousel-description">Participe de rodas de conversa sobre história, lendas e tradições dos Povos do Mar.</div>
+            <div class="carousel-price">R$ 45,00</div>
+          </div>
+        </div>
+
+        <div class="carousel-item">
+          <img src="pesca.jpeg" alt="Experiência de Pesca Artesanal">
+          <div class="carousel-content">
+            <div class="carousel-title">Pesca Artesanal Caiçara</div>
+            <div class="carousel-description">Viva uma manhã autêntica com pescadores locais, aprendendo técnicas tradicionais e conhecendo os segredos do mar.</div>
+            <div class="carousel-price">R$ 120,00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="secao sobre-nos-section">
+    <img src="grupo.jpg" alt="Equipe Kanoa trabalhando no projeto" class="about-image-left">
+    <div class="texto sobre-nos-texto">
+      <h2 class="subtitle">Sobre Nós</h2>
+      <p class="parágrafo">Somos um grupo de sete estudantes do curso de Desenvolvimento de Sistemas (P-TECH) da Etec Jorge Street, em São Caetano do Sul. Durante três anos de formação técnica, aprendemos não apenas programação e tecnologia, mas também a importância de criar soluções que façam diferença na sociedade.</p>
+      <p class="parágrafo">Desenvolvemos o KANOA em parceria com a ONG PermaMar como nosso Trabalho de Conclusão de Curso (TCC). Este projeto representa a união entre conhecimento técnico e propósito social, conectando comunidades tradicionais com visitantes, escolas e empresas através da tecnologia.</p>
+     
+      <h3 class="team-intro-title">Conheça os Integrantes do Grupo</h3>
+    </div>
+  </section>
+
+  <!-- Team carousel -->
+  <div class="carousel-container team-carousel" aria-roledescription="carousel" tabindex="0">
+    <div class="carousel-wrapper">
+      <div class="carousel">
+        <div class="team-carousel-item">
+          <img src="ana.jpg" alt="Ana Beatriz Golçalves dos Santos">
+          <div class="team-member-info">
+            <div class="team-member-name">Ana Beatriz Golçalves dos Santos</div>
+            <div class="team-member-role">Designer e Desenvolvedora Front-End</div>
+          </div>
+        </div>
+
+        <div class="team-carousel-item">
+          <img src="david.jpg" alt="David Lima Alves">
+          <div class="team-member-info">
+            <div class="team-member-name">David Lima Alves</div>
+            <div class="team-member-role">Gerente de banco de dados e avaliador de qualidade</div>
+          </div>
+        </div>
+
+        <div class="team-carousel-item">
+          <img src="gabriel.jpg" alt="Gabriel Lasinskais">
+          <div class="team-member-info">
+            <div class="team-member-name">Gabriel Lasinskais</div>
+            <div class="team-member-role">Segurança de dados, Desenvolvedor Full-stack e desenvolvedor mobile</div>
+          </div>
+        </div>
+
+        <div class="team-carousel-item">
+          <img src="geovanna.jpg" alt="Geovanna Alves Saccoccio">
+          <div class="team-member-info">
+            <div class="team-member-name">Geovanna Alves Saccoccio</div>
+            <div class="team-member-role">Gerente de marketing, designer e redatora acadêmica</div>
+          </div>
+        </div>
+
+        <div class="team-carousel-item">
+          <img src="giovanna.jpg" alt="Giovanna de Oliveira Sousa">
+          <div class="team-member-info">
+            <div class="team-member-name">Giovanna de Oliveira Sousa</div>
+            <div class="team-member-role">Gerente de projetos, desenvolvedora mobile e desenvolvedora Back-End</div>
+          </div>
+        </div>
+
+        <div class="team-carousel-item">
+          <img src="jv.jpg" alt="João Victor Pitareli Stoffel">
+          <div class="team-member-info">
+            <div class="team-member-name">João Victor Pitareli Stoffel</div>
+            <div class="team-member-role">Gerente de banco de dados, designer e gerente de nuvem</div>
+          </div>
+        </div>
+
+        <div class="team-carousel-item">
+          <img src="sofia.jpg" alt="Sofia Paulino Sperandio">
+          <div class="team-member-info">
+            <div class="team-member-name">Sofia Paulino Sperandio</div>
+            <div class="team-member-role">Redatora acadêmica e desenvolvedora front-end</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ong-stats">
+    <div class="stat-item">
+      <span class="stat-number">7</span>
+      <span class="stat-label">Desenvolvedores</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">3</span>
+      <span class="stat-label">Anos de Curso</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">1</span>
+      <span class="stat-label">Projeto com Impacto Social</span>
+    </div>
+  </div>
+
+  <div class="call-to-action" role="region" aria-labelledby="cta-title">
+    <h2 id="cta-title" class="subtitle">Conecte-se ao Futuro do Turismo Sustentável</h2>
+    <p class="parágrafo">Conheça nosso aplicativo e descubra novas formas de viajar em harmonia com o meio ambiente. Entre em contato e saiba como apoiar essa iniciativa.</p>
+    <a href="https://mail.google.com/mail/?view=cm&to=privacidade.kanoaejs@gmail.com" class="cta-button">Entre em Contato</a>
+  </div>
+</main>
+
+<footer id="Encontre-nos" class="container-footer" role="contentinfo">
+  <section class="container-menu-redes-sociais">
+    <div class="footer-coluna esquerda">
+      <p class="menu-footer-title">Redes Sociais</p>
+      <nav class="link-menu" aria-label="Links de redes sociais">
+        <a class="footer-icons" href="https://mail.google.com/mail/?view=cm&to=privacidade.kanoaejs@gmail.com" target="_blank" rel="noopener noreferrer" aria-label="Enviar email" title="Enviar email">
+          <svg class="icon" viewBox="0 -960 960 960"><path d="M168-192q-29.7 0-50.85-21.16Q96-234.32 96-264.04v-432.24Q96-726 117.15-747T168-768h624q29.7 0 50.85 21.16Q864-725.68 864-695.96v432.24Q864-234 842.85-213T792-192H168Zm312-240L168-611v347h624v-347L480-432Zm0-85 312-179H168l312 179Zm-312-94v-85 432-347Z"/></svg>
+        </a>
+
+        <a class="footer-icons" href="https://www.instagram.com/kanoa_tcc?igsh=dXpjdHF5bGgzOGhw" target="_blank" rel="noopener noreferrer" aria-label="Instagram Kanoa">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </a>
+
+        <a class="footer-icons" href="https://youtu.be/yIuNsd1iW4o" target="_blank" rel="noopener noreferrer" aria-label="YouTube Canal">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </a>
+
+        <a class="footer-icons" href="Kanoa_monografia.pdf" target="_blank" rel="noopener noreferrer" aria-label="Download PDF Informativo">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/></svg>
+        </a>
+      </nav>
+
+      <p class="info-footer">Etec Jorge Street<br>Rua Bell Aliance, 149<br>São Caetano do Sul - SP<br>CEP: 09560-650</p>
+    </div>
+
+    <div class="footer-coluna direita">
+      <p class="menu-footer-title">Baixe o App</p>
+      <a href="https://play.google.com/store" target="_blank" rel="noopener noreferrer">
+        <img class="google-play-icon" src="https://www.devmedia.com.br/app/img/bnt_google_play.jpg" alt="Baixe o app">
+      </a>
+    </div>
+  </section>
+  
+  <div class="footer-copyright">
+    <p>© 2025 KANOA - Conectando culturas, regenerando oceanos. Todos os direitos reservados.</p>
+  </div>
+</footer>
+
+<script src="banner.js"></script>
+</body>
+</html>
