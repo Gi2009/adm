@@ -1,15 +1,17 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "dev": "nodemon index.js"
+"scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+
+    "deploy": "node deploy-public.js"
   },
-  "keywords": [],
-  "author": "",
-  "type": "module",
-  "license": "ISC",
-  "description": "",
+
+  "name": "kanoa-backend",
+
+  "engines": {
+    "node": "18.x"
+  },
+
   "dependencies": {
     "@paypal/checkout-server-sdk": "^1.0.3",
     "body-parser": "^2.2.0",
