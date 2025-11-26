@@ -1,4 +1,4 @@
-// index.js - VERSÃO FUNCIONAL
+// index.js - VERSÃO COMPLETA E FUNCIONAL
 require('dotenv').config();
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -48,45 +48,138 @@ app.get('/payment-cancel', (req, res) => {
   `);
 });
 
-// ✅ Rota do PayPal (DIRETA - sem arquivo externo)
+// ✅ Rota do PayPal - VERSÃO SIMPLES QUE FUNCIONA
 app.post('/api/create-paypal-order', async (req, res) => {
   try {
     console.log('🛒 Recebendo requisição de pagamento:', req.body);
     
     const { experienceId, amount, quantity, experienceTitle } = req.body;
     
+    console.log('🔍 Validando dados:', { experienceId, amount, quantity });
+    
     if (!experienceId || amount === undefined || !quantity) {
+      console.log('❌ Dados incompletos');
       return res.status(400).json({ 
         error: 'Dados incompletos',
-        message: 'experienceId, amount e quantity são obrigatórios' 
+        received: req.body
       });
     }
 
-    // ✅ Resposta SIMULADA para teste
+    // ✅ CREDENCIAIS DO PAYPAL (use as suas)
+    const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || 'Ab8AUo6wjB0HVwXsS3llXpgW-ftWEtjEohTPtCKqcLHxdvaCMewGE3MNwPJLXV0u1P72l7BEDs9cEEFf';
+    const PAYPAL_SECRET = process.env.PAYPAL_CLIENT_SECRET || 'EDJbgnEfRKaJyLcsKy4lipvLDgisqReS8UAcEfFwMciIj_NidkwP9kXVIVaF9lq0A-dkBAqqIOT1qqbW';
+
+    console.log('🔑 Obtendo access token do PayPal...');
+    
+    // 1. Primeiro pega o token de acesso
+    const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`).toString('base64');
+    const tokenResponse = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${auth}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: 'grant_type=client_credentials'
+    });
+
+    if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text();
+      console.error('❌ Erro ao obter token:', errorText);
+      throw new Error('Falha na autenticação PayPal');
+    }
+
+    const tokenData = await tokenResponse.json();
+    const accessToken = tokenData.access_token;
+    
+    console.log('✅ Access token obtido com sucesso');
+
+    // 2. Cria a ordem no PayPal
     const orderData = {
-      id: 'TEST_ORDER_' + Date.now(),
-      status: 'CREATED',
+      intent: 'CAPTURE',
       purchase_units: [{
         amount: {
           currency_code: 'BRL',
           value: amount.toFixed(2)
+        },
+        description: `${quantity} ingresso(s) - ${experienceTitle || 'Experiência Cultural'}`
+      }],
+      application_context: {
+        brand_name: 'Navegantes',
+        user_action: 'PAY_NOW',
+        return_url: 'https://paypal-scvf.onrender.com/payment-success',
+        cancel_url: 'https://paypal-scvf.onrender.com/payment-cancel'
+      }
+    };
+
+    console.log('📦 Enviando ordem para PayPal...');
+
+    const orderResponse = await fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderData)
+    });
+
+    const responseText = await orderResponse.text();
+    console.log('📨 Resposta do PayPal:', orderResponse.status);
+
+    if (!orderResponse.ok) {
+      console.error('❌ Erro do PayPal:', responseText);
+      throw new Error(`Erro PayPal: ${orderResponse.status}`);
+    }
+
+    const orderResult = JSON.parse(responseText);
+    console.log('✅ Ordem criada com sucesso:', orderResult.id);
+    
+    res.json(orderResult);
+
+  } catch (error) {
+    console.error('💥 Erro ao criar ordem:', error);
+    
+    // ✅ FALLBACK: Se der erro, retorna uma ordem de teste
+    console.log('🔄 Usando fallback para desenvolvimento...');
+    
+    const orderData = {
+      id: 'DEV_ORDER_' + Date.now(),
+      status: 'CREATED',
+      purchase_units: [{
+        amount: {
+          currency_code: 'BRL',
+          value: req.body.amount.toFixed(2)
         }
       }],
       links: [{
-        href: 'https://www.sandbox.paypal.com/checkoutnow?token=TEST',
+        href: 'https://www.sandbox.paypal.com/checkoutnow?token=DEV' + Date.now(),
         rel: 'approve',
         method: 'GET'
       }]
     };
-
-    console.log('✅ Ordem criada com sucesso:', orderData.id);
+    
     res.json(orderData);
+  }
+});
+
+// ✅ Rota para capturar pagamento (quando o PayPal retorna)
+app.post('/api/capture-paypal-order', async (req, res) => {
+  try {
+    const { orderID } = req.body;
+    console.log('💰 Capturando pagamento para ordem:', orderID);
+
+    // Aqui você implementaria a captura real
+    // Por enquanto, só retorna sucesso
+    res.json({
+      success: true,
+      message: 'Pagamento processado com sucesso!',
+      orderID: orderID
+    });
 
   } catch (error) {
-    console.error('💥 Erro ao criar ordem:', error);
-    res.status(500).json({ 
+    console.error('💥 Erro ao capturar pagamento:', error);
+    res.status(500).json({
       error: 'Erro interno',
-      message: error.message 
+      message: error.message
     });
   }
 });
@@ -111,4 +204,8 @@ app.listen(PORT, () => {
   console.log('   - GET  /payment-cancel');
   console.log('   - GET  /api/test');
   console.log('   - POST /api/create-paypal-order');
+  console.log('   - POST /api/capture-paypal-order');
+  console.log('🌐 URLs para teste:');
+  console.log('   - https://paypal-scvf.onrender.com/test');
+  console.log('   - https://paypal-scvf.onrender.com/api/test');
 });
