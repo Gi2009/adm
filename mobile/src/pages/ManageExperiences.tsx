@@ -708,34 +708,34 @@ const ComprasSection = () => {
           <CardContent className="pt-0">
             <div className="space-y-3">
               {comprasExp.map((compra) => (
-                <div key={compra.id} className="flex justify-between items-start p-3 border rounded-lg bg-gray-50/50">
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{compra.user_nome}</p>
-                    <p className="text-xs text-muted-foreground mb-1">{compra.user_email}</p>
-                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                        Compra: {format(new Date(compra.data_compra), 'dd/MM/yyyy HH:mm')}
-                      </span>
-                      {compra.data_experiencia && (
-                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
-                          Experiência: {format(new Date(compra.data_experiencia), 'dd/MM/yyyy')}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right ml-4">
-                    <p className="font-medium text-green-600">R$ {compra.valor?.toFixed(2) || '0.00'}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {compra.quantidade_ingressos || 1} ingresso(s)
-                    </p>
-                    <Badge 
-                      variant={compra.status === 'confirmado' ? 'default' : 'secondary'} 
-                      className="text-xs mt-1"
-                    >
-                      {compra.status || 'confirmado'}
-                    </Badge>
-                  </div>
-                </div>
+               <div key={compra.id} className="flex flex-col sm:flex-row justify-between items-start p-3 border rounded-lg bg-gray-50/50 gap-3">
+  <div className="flex-1 min-w-0">
+    <p className="font-medium text-sm truncate">{compra.user_nome}</p>
+    <p className="text-xs text-muted-foreground mb-1 truncate">{compra.user_email}</p>
+    <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
+      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded whitespace-nowrap">
+        Compra: {format(new Date(compra.data_compra), 'dd/MM/yyyy HH:mm')}
+      </span>
+      {compra.data_experiencia && (
+        <span className="bg-green-100 text-green-800 px-2 py-1 rounded whitespace-nowrap">
+          Experiência: {format(new Date(compra.data_experiencia), 'dd/MM/yyyy')}
+        </span>
+      )}
+    </div>
+  </div>
+  <div className="text-right sm:text-left sm:ml-4 flex-shrink-0">
+    <p className="font-medium text-green-600 whitespace-nowrap">R$ {compra.valor?.toFixed(2) || '0.00'}</p>
+    <p className="text-xs text-muted-foreground whitespace-nowrap">
+      {compra.quantidade_ingressos || 1} ingresso(s)
+    </p>
+    <Badge 
+      variant={compra.status === 'confirmado' ? 'default' : 'secondary'} 
+      className="text-xs mt-1 whitespace-nowrap"
+    >
+      {compra.status || 'confirmado'}
+    </Badge>
+  </div>
+</div>
               ))}
             </div>
           </CardContent>
@@ -825,15 +825,16 @@ const ComprasSection = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 pb-20">
       <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-emerald-200">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-emerald-800">Gerenciar Experiências</h1>
-            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
-              <UserCheck className="w-3 h-3 mr-1" />
-              Tipo 2 - Completo
-            </Badge>
-          </div>
-          <div className="flex gap-2">
+  <div className="container mx-auto px-4 py-4">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex items-center gap-3 flex-wrap">
+        <h1 className="text-xl sm:text-2xl font-bold text-emerald-800">Gerenciar Experiências</h1>
+        <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 text-xs">
+          <UserCheck className="w-3 h-3 mr-1" />
+          Tipo 2 - Completo
+        </Badge>
+      </div>
+      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <Dialog open={isBankDialogOpen} onOpenChange={setIsBankDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -910,7 +911,7 @@ const ComprasSection = () => {
                   setEditingExperience(null);
                   setSelectedDates([]);
                 }} className="bg-emerald-600 hover:bg-emerald-700">
-                  <Plus className="mr-2" size={16} />
+                  <Plus className="mr-2" size="sm" />
                   Nova Experiência
                 </Button>
               </DialogTrigger>
@@ -1059,6 +1060,7 @@ const ComprasSection = () => {
               </DialogContent>
             </Dialog>
           </div>
+          </div>
         </div>
       </header>
 
@@ -1073,20 +1075,20 @@ const ComprasSection = () => {
           </CardHeader>
           <CardContent>
             {hasBankData ? (
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label>Email PayPal</Label>
-                  <p className="text-sm">{bankData.email_paypal}</p>
-                </div>
-                <div>
-                  <Label>Nome do Titular</Label>
-                  <p className="text-sm">{bankData.nome_titular}</p>
-                </div>
-                <div>
-                  <Label>CPF</Label>
-                  <p className="text-sm">{bankData.cpf_titular}</p>
-                </div>
-              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  <div className="break-words">
+    <Label className="text-sm font-medium">Email PayPal</Label>
+    <p className="text-sm text-muted-foreground mt-1 truncate">{bankData.email_paypal}</p>
+  </div>
+  <div className="break-words">
+    <Label className="text-sm font-medium">Nome do Titular</Label>
+    <p className="text-sm text-muted-foreground mt-1 truncate">{bankData.nome_titular}</p>
+  </div>
+  <div className="break-words">
+    <Label className="text-sm font-medium">CPF</Label>
+    <p className="text-sm text-muted-foreground mt-1 truncate">{bankData.cpf_titular}</p>
+  </div>
+</div>
             ) : (
               <div className="text-center py-4">
                 <CreditCard className="mx-auto mb-2 text-muted-foreground" size={32} />
@@ -1133,11 +1135,11 @@ const ComprasSection = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {experiences.map((experience) => (
-              <ExperienceCard key={experience.id} experience={experience} />
-            ))}
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+  {experiences.map((experience) => (
+    <ExperienceCard key={experience.id} experience={experience} />
+  ))}
+</div>
         )}
       </main>
     </div>
@@ -1146,3 +1148,4 @@ const ComprasSection = () => {
 }
 
 export default ManageExperiences;
+
