@@ -58,25 +58,27 @@ const PaypalRegistration = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="p-6">
           <Button
             variant="ghost"
-            onClick={() => navigate(1)}
-            className="w-fit p-0 mb-4"
+            onClick={() => navigate(-1)}
+            className="w-fit p-0 mb-4 hover:bg-transparent"
           >
             <ArrowLeft className="mr-2" size={16} />
             Voltar
           </Button>
           <div className="flex items-center gap-2">
             <CreditCard className="w-6 h-6 text-primary" />
-            <CardTitle>Cadastro de Dados Bancários</CardTitle>
+            <CardTitle className="text-xl md:text-2xl">Cadastro de Dados Bancários</CardTitle>
           </div>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="email_paypal">Email do PayPal *</Label>
+        <CardContent className="p-6 pt-0">
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email_paypal" className="text-sm md:text-base">
+                Email do PayPal *
+              </Label>
               <Input
                 id="email_paypal"
                 type="email"
@@ -84,43 +86,53 @@ const PaypalRegistration = () => {
                 onChange={(e) => setFormData({...formData, email_paypal: e.target.value})}
                 placeholder="seu.email@paypal.com"
                 required
+                className="h-10 md:h-12 text-sm md:text-base"
               />
             </div>
 
-            <div>
-              <Label htmlFor="nome_titular">Nome do Titular *</Label>
+            <div className="space-y-2">
+              <Label htmlFor="nome_titular" className="text-sm md:text-base">
+                Nome do Titular *
+              </Label>
               <Input
                 id="nome_titular"
                 value={formData.nome_titular}
                 onChange={(e) => setFormData({...formData, nome_titular: e.target.value})}
                 placeholder="Nome completo como cadastrado no PayPal"
                 required
+                className="h-10 md:h-12 text-sm md:text-base"
               />
             </div>
 
-            <div>
-              <Label htmlFor="cpf_titular">CPF do Titular *</Label>
+            <div className="space-y-2">
+              <Label htmlFor="cpf_titular" className="text-sm md:text-base">
+                CPF do Titular *
+              </Label>
               <Input
                 id="cpf_titular"
                 value={formData.cpf_titular}
                 onChange={(e) => setFormData({...formData, cpf_titular: e.target.value})}
                 placeholder="000.000.000-00"
                 required
+                className="h-10 md:h-12 text-sm md:text-base"
               />
             </div>
 
             <Button 
               type="submit" 
-              className="w-full bg-emerald-600 hover:bg-emerald-700"
+              className="w-full h-12 md:h-14 bg-emerald-600 hover:bg-emerald-700 text-sm md:text-base font-medium"
               disabled={loading}
             >
               {loading ? (
-                <>Processando...</>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  Processando...
+                </div>
               ) : (
-                <>
-                  <CheckCircle className="mr-2" size={16} />
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />
                   Salvar Dados Bancários
-                </>
+                </div>
               )}
             </Button>
           </form>
