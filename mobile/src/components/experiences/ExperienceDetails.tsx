@@ -54,21 +54,23 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const getApiBaseUrl = () => {
-  // Se estiver em desenvolvimento local (frontend na porta 8081)
+/*const getApiBaseUrl = () => {
+  // Se estiver em desenvolvimento local
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     if (window.location.port === '8081') {
-      return 'https://chubbier-jonathan-unserenely.ngrok-free.dev/api';
+      return 'https://paypal-scvf.onrender.com'; // ✅ SEU BACKEND NO RENDER
     }
-    return 'http://localhost:3000/api';
+    return 'http://localhost:3000';
   }
   
-  // ✅ PARA QUALQUER CELULAR - Use SEMPRE o ngrok
-  return 'https://chubbier-jonathan-unserenely.ngrok-free.dev/api';
+  // ✅ PARA QUALQUER CELULAR - Use SEMPRE o Render
+  return 'https://paypal-scvf.onrender.com'; // ✅ SEU BACKEND NO RENDER
 };
+*/
 
 
-const API_BASE_URL = getApiBaseUrl();
+    // ... resto do código
+const API_BASE_URL = 'https://paypal-scvf.onrender.com';
 
 const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = false }: ExperienceDetailsProps) => {
   const [paypalLoaded, setPaypalLoaded] = useState(false);
@@ -182,11 +184,12 @@ const ExperienceDetails = ({ experience, open, onOpenChange, isPurchaseView = fa
       },
       createOrder: async function(data: any, actions: any) {
         try {
+           console.log('🔍 URL que será usada:', `${API_BASE_URL}/api/create-paypal-order`);
           if (!experience) throw new Error("Experiência não definida");
 
           console.log('Criando ordem para:', experience.id, 'Quantidade:', ticketQuantity, 'Total:', totalAmount);
           
-           const response = await fetch(`${API_BASE_URL}/create-paypal-order`, {
+           const response = await fetch(`${API_BASE_URL}/api/create-paypal-order`, {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
