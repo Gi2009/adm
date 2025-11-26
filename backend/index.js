@@ -184,6 +184,25 @@ app.post('/api/capture-paypal-order', async (req, res) => {
   }
 });
 
+app.post('/api/check-order-status', async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    console.log('🔍 Verificando status do pedido:', orderId);
+    
+    // Por enquanto, retorna um status simulado
+    // Em produção, você verificaria com a API do PayPal
+    res.json({
+      orderId: orderId,
+      status: 'PENDING', // ou 'COMPLETED' quando o pagamento for feito
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('Erro ao verificar status:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ✅ Rota de teste da API
 app.get('/api/test', (req, res) => {
   res.json({ 
