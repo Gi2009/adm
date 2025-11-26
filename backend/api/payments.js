@@ -80,8 +80,8 @@ router.post('/create-paypal-order', async (req, res) => {
       application_context: {
         brand_name: 'Sua Plataforma',
   user_action: 'PAY_NOW',
-  return_url: 'https://your-app.com/payment-success', // Ou deixe vazio
-  cancel_url: 'https://your-app.com/payment-cancel'   // Ou deixe vazio
+   return_url: 'https://paypal-scvf.onrender.com/payment-success',
+  cancel_url: 'https://paypal-scvf.onrender.com/payment-cancel
       }
     };
 
