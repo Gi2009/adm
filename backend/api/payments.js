@@ -78,7 +78,7 @@ router.post('/create-paypal-order', async (req, res) => {
         ]
       }],
       application_context: {
-  brand_name: 'Navegantes',
+  brand_name: 'Kanoa',
   user_action: 'PAY_NOW',
   return_url: 'https://paypal-scvf.onrender.com/payment-success',
   cancel_url: 'https://paypal-scvf.onrender.com/payment-cancel',
