@@ -1,4 +1,4 @@
-// index.js - VERSÃO CORRIGIDA
+// index.js - VERSÃO CORRIGIDA DEFINITIVA
 require('dotenv').config();
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -58,22 +58,7 @@ try {
   });
 }
 
-// ✅ CORREÇÃO: Middleware para rotas não encontradas (SEM o ; que causava erro)
-app.use('*', (req, res) => {
-  console.log('❌ Rota não encontrada:', req.originalUrl);
-  res.status(404).json({ 
-    error: 'Rota não encontrada',
-    path: req.originalUrl,
-    availableRoutes: [
-      'GET /test', 
-      'GET /health',
-      'POST /api/create-paypal-order', 
-      'GET /api/test'
-    ]
-  });
-});
-
-// ✅ CORREÇÃO: Rotas para callback do PayPal
+// ✅ CORREÇÃO: Rotas para callback do PayPal (ADICIONE ESTAS ANTES DO 404)
 app.get('/payment-success', (req, res) => {
   console.log('✅ Pagamento sucesso via callback');
   res.send(`
@@ -83,7 +68,6 @@ app.get('/payment-success', (req, res) => {
         <p>Volte para o app para continuar.</p>
         <script>
           setTimeout(() => {
-            // Tenta fechar a janela ou redirecionar
             if (window.opener) {
               window.close();
             } else {
@@ -115,6 +99,23 @@ app.get('/payment-cancel', (req, res) => {
       </body>
     </html>
   `);
+});
+
+// ✅ CORREÇÃO: Middleware para rotas não encontradas (SEM '*' PROBLEMÁTICO)
+app.use((req, res, next) => {
+  console.log('❌ Rota não encontrada:', req.originalUrl);
+  res.status(404).json({ 
+    error: 'Rota não encontrada',
+    path: req.originalUrl,
+    availableRoutes: [
+      'GET /test', 
+      'GET /health',
+      'GET /payment-success',
+      'GET /payment-cancel',
+      'POST /api/create-paypal-order', 
+      'GET /api/test'
+    ]
+  });
 });
 
 const PORT = process.env.PORT || 3000;
