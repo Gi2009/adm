@@ -78,11 +78,12 @@ router.post('/create-paypal-order', async (req, res) => {
         ]
       }],
       application_context: {
-        brand_name: 'Sua Plataforma',
+  brand_name: 'Navegantes',
   user_action: 'PAY_NOW',
-   return_url: 'https://paypal-scvf.onrender.com/payment-success',
-  cancel_url: 'https://paypal-scvf.onrender.com/payment-cancel
-      }
+  return_url: 'https://paypal-scvf.onrender.com/payment-success',
+  cancel_url: 'https://paypal-scvf.onrender.com/payment-cancel',
+  shipping_preference: 'NO_SHIPPING'
+}
     };
 
     console.log('📦 Enviando para PayPal:', JSON.stringify(orderData, null, 2));
