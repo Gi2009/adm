@@ -23,6 +23,82 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Servidor saudável' });
 });
 
+// ✅ Rota para verificar status REAL do PayPal
+app.post('/api/check-paypal-payment', async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    console.log('🔍 Verificando status REAL do PayPal:', orderId);
+
+    const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
+    const PAYPAL_SECRET = process.env.PAYPAL_CLIENT_SECRET;
+
+    // Obter access token
+    const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`).toString('base64');
+    const tokenResponse = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${auth}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: 'grant_type=client_credentials'
+    });
+
+    const tokenData = await tokenResponse.json();
+    const accessToken = tokenData.access_token;
+
+    // Verificar ordem no PayPal
+    const orderResponse = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!orderResponse.ok) {
+      throw new Error('Ordem não encontrada');
+    }
+
+    const orderData = await orderResponse.json();
+    console.log('📊 Status real do PayPal:', orderData.status);
+
+    res.json({
+      orderId: orderId,
+      status: orderData.status,
+      details: orderData
+    });
+
+  } catch (error) {
+    console.error('Erro ao verificar pagamento:', error);
+    res.status(500).json({ 
+      error: error.message,
+      status: 'UNKNOWN'
+    });
+  }
+});
+
+// ✅ Rota para salvar compra manualmente
+app.post('/api/save-purchase', async (req, res) => {
+  try {
+    const { userId, experienceId, selectedDate, ticketQuantity, totalAmount, paymentDetails } = req.body;
+    
+    console.log('💾 Salvando compra manualmente:', {
+      userId, experienceId, selectedDate, ticketQuantity, totalAmount
+    });
+
+    // Aqui você salvaria no seu banco de dados
+    // Por enquanto, só retorna sucesso
+    res.json({
+      success: true,
+      message: 'Compra salva com sucesso!',
+      purchaseId: 'COMPRA_' + Date.now()
+    });
+
+  } catch (error) {
+    console.error('Erro ao salvar compra:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ✅ Rotas de callback do PayPal
 app.get('/payment-success', (req, res) => {
   console.log('✅ Pagamento aprovado via callback');
