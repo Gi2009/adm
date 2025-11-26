@@ -1,11 +1,11 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.kanoa.turismoecologico',
+  appId: 'com.kanoa.app',
   appName: 'Kanoa',
   webDir: 'dist',
   server: {
-    url: 'https://de443792-7025-45c8-9aac-067ba1a30a21.lovableproject.com?forceHideBadge=true',
+    url: 'http://localhost:3000',
     cleartext: true
   },
   plugins: {

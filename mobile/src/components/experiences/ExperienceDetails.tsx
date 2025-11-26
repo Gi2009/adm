@@ -55,17 +55,18 @@ const formatDate = (dateString: string) => {
 };
 
 const getApiBaseUrl = () => {
+  // Se estiver em desenvolvimento local (frontend na porta 8081)
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    if (window.location.port === '8081') {
+      return 'https://chubbier-jonathan-unserenely.ngrok-free.dev/api';
+    }
     return 'http://localhost:3000/api';
   }
   
-  if (window.location.hostname.includes('ngrok-free.dev')) {
-    return 'https://chubler-jonathan-unserenely.ngrok-free.dev/api';
-  }
-  
-  // Para IP local (celular na mesma rede)
-  return 'http://192.168.1.7:3000/api';
+  // ✅ PARA QUALQUER CELULAR - Use SEMPRE o ngrok
+  return 'https://chubbier-jonathan-unserenely.ngrok-free.dev/api';
 };
+
 
 const API_BASE_URL = getApiBaseUrl();
 

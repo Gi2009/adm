@@ -80,8 +80,8 @@ router.post('/create-paypal-order', async (req, res) => {
       application_context: {
         brand_name: 'Sua Plataforma',
         user_action: 'PAY_NOW',
-        return_url: 'https://chubler-jonathan-unserenely.ngrok-free.dev/payment/success',
-        cancel_url: 'https://chubler-jonathan-unserenely.ngrok-free.dev/payment/cancel'
+          return_url: 'https://chubbier-jonathan-unserenely.ngrok-free.dev/payment/success',
+          cancel_url: 'https://chubbier-jonathan-unserenely.ngrok-free.dev/payment/cancel'
       }
     };
 
