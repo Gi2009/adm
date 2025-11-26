@@ -7,9 +7,24 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: ["http://localhost:8080", "http://127.0.0.1:8080"],
-  credentials: true
+  origin: [
+    'http://localhost:8081',
+    'http://localhost:3000',
+    'https://your-app.com', // Seu domínio em produção
+    'file://' // Para APK
+  ],  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
+
+
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
